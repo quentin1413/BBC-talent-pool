@@ -78,7 +78,8 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 .settings-title{font-size:13px;font-weight:500;margin-bottom:4px}
 .settings-desc{font-size:11px;color:var(--color-text-secondary);margin-bottom:10px}
 .settings-tags{display:flex;flex-wrap:wrap;gap:6px}
-.st-tag{display:inline-flex;align-items:center;gap:4px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:3px 10px;font-size:12px;cursor:default}
+.st-tag{display:inline-flex;align-items:center;gap:4px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:3px 10px;font-size:12px;cursor:pointer;transition:background .15s,border-color .15s}
+.st-tag:hover{background:var(--color-primary-light, #e8f5f0);border-color:var(--color-primary, #1D9E75)}
 .st-tag .del{cursor:pointer;color:var(--color-text-secondary);font-size:14px;line-height:1;margin-left:2px}
 .st-tag .del:hover{color:#c0392b}
 .proj-head{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;cursor:pointer;gap:8px}
@@ -243,7 +244,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 
 <!-- 设置 -->
 <div class="panel" id="p-settings">
-  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px">自定义技能和岗位选项，所有表单的标签都会同步更新。</div>
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px">点击岗位标签可自动跳转至「岗位匹配」并填入名称；点击技能标签可跳转至「手动录入」并选中该技能。点 × 可删除选项。</div>
 
   <div class="settings-section">
     <div class="settings-title">🏷 岗位选项</div>
@@ -336,11 +337,24 @@ function renderSettingsTags(){
   const skills = getSkills();
   const roles  = getRoles();
   document.getElementById('st-skills').innerHTML = skills.map((s,i)=>
-    `<span class="st-tag">${s}<span class="del" onclick="delSettingItem('skill',${i})">×</span></span>`
+    `<span class="st-tag" title="点击跳转到手动录入并选中该技能" onclick="quickFillSkill('${s.replace(/'/g,"\\'")}')">&#128196; ${s}<span class="del" onclick="event.stopPropagation();delSettingItem('skill',${i})">&times;</span></span>`
   ).join('');
   document.getElementById('st-roles').innerHTML  = roles.map((r,i)=>
-    `<span class="st-tag">${r}<span class="del" onclick="delSettingItem('role',${i})">×</span></span>`
+    `<span class="st-tag" title="点击跳转到岗位匹配并自动填入" onclick="quickFillRole('${r.replace(/'/g,"\\'")}')">&#128269; ${r}<span class="del" onclick="event.stopPropagation();delSettingItem('role',${i})">&times;</span></span>`
   ).join('');
+}
+
+// 快捷跳转：点击岗位标签 → 跳到岗位匹配 Tab 并填入
+function quickFillRole(role){
+  sw('match');
+  document.getElementById('m-role').value = role;
+}
+
+// 快捷跳转：点击技能标签 → 跳到手动录入 Tab 并选中该技能
+function quickFillSkill(skill){
+  sw('add');
+  const tag = [...document.querySelectorAll('#add-tags .tag')].find(t=>t.textContent===skill);
+  if(tag && !tag.classList.contains('on')) tag.classList.add('on');
 }
 
 function delSettingItem(type, idx){
