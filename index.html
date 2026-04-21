@@ -1,0 +1,701 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)}
+.wrap{padding:1rem 0}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem}
+.tab{padding:8px 18px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
+.panel{display:none}.panel.active{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.field label{font-size:11px;color:var(--color-text-secondary);letter-spacing:.3px}
+.field input,.field select,.field textarea{width:100%;font-size:13px;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--color-border-primary)}
+.field textarea{height:64px;resize:none}
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.tag{font-size:11px;padding:3px 9px;border-radius:99px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .15s;user-select:none}
+.tag.on{background:#E6F1FB;color:#0C447C;border-color:#85B7EB}
+.btn{padding:8px 18px;font-size:13px;cursor:pointer;border-radius:var(--border-radius-md);font-weight:500;transition:all .15s}
+.btn-p{background:var(--color-text-primary);color:var(--color-background-primary);border:none}
+.btn-p:hover{opacity:.85}
+.btn-s{background:none;color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary)}
+.btn-s:hover{background:var(--color-background-secondary)}
+.btn-ai{background:#E1F5EE;color:#0F6E56;border:0.5px solid #5DCAA5;display:flex;align-items:center;gap:6px}
+.btn-ai:hover{background:#9FE1CB}
+
+/* upload zone */
+.upload-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--color-background-secondary);margin-bottom:1rem}
+.upload-zone:hover,.upload-zone.drag{border-color:#1D9E75;background:#E1F5EE}
+.upload-zone.drag *{pointer-events:none}
+.upload-icon{font-size:28px;margin-bottom:8px}
+.upload-hint{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
+.file-preview{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:12px}
+.file-thumb{width:44px;height:56px;object-fit:cover;border-radius:4px;border:0.5px solid var(--color-border-tertiary);background:#f5f5f5}
+.file-thumb-pdf{width:44px;height:56px;display:flex;align-items:center;justify-content:center;background:#FAECE7;border-radius:4px;font-size:11px;font-weight:500;color:#993C1D}
+.file-name{font-size:13px;font-weight:500;flex:1}
+.file-size{font-size:11px;color:var(--color-text-secondary)}
+
+/* ai parse result */
+.parse-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:1rem}
+.parse-box .title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.parse-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:13px}
+.parse-key{color:var(--color-text-secondary);min-width:60px;flex-shrink:0}
+.parse-val{color:var(--color-text-primary)}
+
+/* candidate card */
+.c-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;margin-bottom:8px;transition:border-color .15s}
+.c-card:hover{border-color:var(--color-border-secondary)}
+.c-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.c-name{font-weight:500;font-size:14px}
+.c-sub{font-size:12px;color:var(--color-text-secondary)}
+.skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.sk{font-size:11px;padding:2px 7px;border-radius:99px;background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97}
+.badge{font-size:10px;padding:2px 7px;border-radius:99px}
+.match-pct{font-size:18px;font-weight:500;color:#0F6E56;margin-left:auto;text-align:right}
+.match-lbl{font-size:10px;color:var(--color-text-secondary);text-align:right}
+.border-match{border-left:3px solid #1D9E75}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
+.stat-n{font-size:22px;font-weight:500}
+.stat-l{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.empty{text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:13px}
+.notice{font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 12px;margin-bottom:1rem;line-height:1.6}
+.loading-dots::after{content:'.';animation:dots 1.2s steps(3,end) infinite}
+@keyframes dots{0%,100%{content:'.'}33%{content:'..'}66%{content:'...'}}
+.progress-bar{height:3px;background:var(--color-border-tertiary);border-radius:99px;margin:8px 0;overflow:hidden}
+.progress-fill{height:100%;background:#1D9E75;border-radius:99px;transition:width .4s;width:0%}
+.search-row{display:flex;gap:8px;margin-bottom:1rem}
+.search-row input{flex:1;font-size:13px;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);outline:none}
+.search-row select{font-size:13px;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);outline:none;width:110px}
+
+/* project cards */
+.proj-list{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.proj-item{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
+.proj-head{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;cursor:pointer;gap:8px}
+.proj-title{font-size:12px;font-weight:500;color:var(--color-text-primary);flex:1}
+.proj-time{font-size:11px;color:var(--color-text-secondary);flex-shrink:0}
+.proj-toggle{font-size:10px;color:var(--color-text-secondary);flex-shrink:0;transition:transform .2s}
+.proj-body{display:none;padding:0 11px 10px;border-top:0.5px solid var(--color-border-tertiary)}
+.proj-body.open{display:block}
+.proj-tech{display:flex;flex-wrap:wrap;gap:4px;margin:7px 0 5px}
+.proj-tech span{font-size:10px;padding:2px 6px;border-radius:99px;background:#EEF4FE;color:#2A52A0;border:0.5px solid #A8C0F0}
+.proj-desc{font-size:12px;color:var(--color-text-primary);line-height:1.6;white-space:pre-wrap}
+/* detail expand in cCard */
+.c-projects{margin-top:7px;border-top:0.5px solid var(--color-border-tertiary);padding-top:7px}
+.c-proj-item{margin-bottom:5px}
+.c-proj-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.c-proj-meta{font-size:11px;color:var(--color-text-secondary);margin-top:1px}
+/* resume image */
+.resume-thumb{width:36px;height:46px;object-fit:cover;border-radius:3px;border:0.5px solid var(--color-border-tertiary);cursor:pointer;flex-shrink:0;transition:opacity .15s}
+.resume-thumb:hover{opacity:.75}
+/* lightbox */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;align-items:center;justify-content:center}
+.lightbox.show{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.lightbox-close{position:fixed;top:18px;right:22px;font-size:28px;color:#fff;cursor:pointer;line-height:1;user-select:none}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">AI 人才库 — 支持简历文件上传自动解析、岗位匹配</h2>
+<div class="tabs">
+  <button class="tab active" onclick="sw('stats')">总览</button>
+  <button class="tab" onclick="sw('add')">手动录入</button>
+  <button class="tab" onclick="sw('upload')">📄 AI 解析简历</button>
+  <button class="tab" onclick="sw('search')">查询</button>
+  <button class="tab" onclick="sw('match')">岗位匹配</button>
+</div>
+
+<!-- 总览 -->
+<div class="panel active" id="p-stats">
+  <div class="stat-row">
+    <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">候选人总数</div></div>
+    <div class="stat"><div class="stat-n" id="s-avail">0</div><div class="stat-l">可联系</div></div>
+    <div class="stat"><div class="stat-n" id="s-cats">0</div><div class="stat-l">岗位类别</div></div>
+    <div class="stat"><div class="stat-n" id="s-recent">0</div><div class="stat-l">近30天新增</div></div>
+  </div>
+  <div style="font-size:13px;font-weight:500;margin-bottom:10px">最近录入</div>
+  <div id="recent-list"></div>
+</div>
+
+<!-- 手动录入 -->
+<div class="panel" id="p-add">
+  <div class="grid2">
+    <div class="field"><label>姓名 *</label><input id="f-name" placeholder="张三"></div>
+    <div class="field"><label>联系电话</label><input id="f-phone" placeholder="138xxxx1234"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>邮箱</label><input id="f-email" placeholder="zhangsan@email.com"></div>
+    <div class="field"><label>意向岗位 *</label><input id="f-role" placeholder="如：产品经理"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>工作年限</label>
+      <select id="f-exp"><option>应届</option><option>1-3年</option><option>3-5年</option><option>5-10年</option><option>10年+</option></select>
+    </div>
+    <div class="field"><label>期望薪资（K）</label><input id="f-salary" placeholder="15-20"></div>
+  </div>
+  <div class="field"><label>技能标签</label>
+    <div class="tag-row" id="add-tags">
+      <span class="tag" onclick="tt(this)">Java</span><span class="tag" onclick="tt(this)">Python</span><span class="tag" onclick="tt(this)">React</span><span class="tag" onclick="tt(this)">Vue</span><span class="tag" onclick="tt(this)">产品设计</span><span class="tag" onclick="tt(this)">用户研究</span><span class="tag" onclick="tt(this)">数据分析</span><span class="tag" onclick="tt(this)">SQL</span><span class="tag" onclick="tt(this)">运营策划</span><span class="tag" onclick="tt(this)">新媒体</span><span class="tag" onclick="tt(this)">销售</span><span class="tag" onclick="tt(this)">客服</span><span class="tag" onclick="tt(this)">财务</span><span class="tag" onclick="tt(this)">人力资源</span><span class="tag" onclick="tt(this)">项目管理</span><span class="tag" onclick="tt(this)">UI/UX</span><span class="tag" onclick="tt(this)">市场营销</span><span class="tag" onclick="tt(this)">法务</span>
+    </div>
+    <input placeholder="自定义技能，回车添加" onkeydown="addCustom(event,'add-tags')" style="margin-top:7px">
+  </div>
+  <div class="field"><label>状态</label>
+    <select id="f-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
+  </div>
+  <div class="field"><label>备注</label><textarea id="f-note" placeholder="面试印象、优缺点、特别说明..."></textarea></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-p" onclick="saveCandidate()">保存候选人</button>
+    <button class="btn btn-s" onclick="clearForm()">清空</button>
+  </div>
+</div>
+
+<!-- AI 解析简历 -->
+<div class="panel" id="p-upload">
+  <div class="notice">支持上传简历图片（JPG/PNG），由 AI 自动提取：姓名、联系方式、意向岗位、技能、<strong>教育背景、项目经历、证书</strong>及完整摘要，解析后可编辑再保存。每次解析一份简历。</div>
+  <div class="field" style="margin-bottom:12px">
+    <label>OpenAI API Key <span style="color:#A32D2D">*</span> <span style="font-weight:400;color:var(--color-text-secondary)">（仅本地使用，不会上传到任何服务器）</span></label>
+    <input id="api-key" type="password" placeholder="sk-proj-..." style="font-family:monospace" oninput="saveApiKey(this.value)">
+  </div>
+
+  <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)">
+    <div class="upload-icon">📄</div>
+    <div style="font-size:14px;font-weight:500">点击上传或拖入简历文件</div>
+    <div class="upload-hint">支持 JPG / PNG / PDF，建议单页清晰图片效果最佳</div>
+  </div>
+  <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="onFileSelect(event)">
+
+  <div id="file-preview-area"></div>
+  <div id="parse-status"></div>
+  <div id="parse-result-area"></div>
+
+  <!-- 解析后的编辑表单（隐藏直到解析完成） -->
+  <div id="parsed-form" style="display:none">
+    <div style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">确认并编辑信息</div>
+    <div class="grid2">
+      <div class="field"><label>姓名 *</label><input id="p-name"></div>
+      <div class="field"><label>联系电话</label><input id="p-phone"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>邮箱</label><input id="p-email"></div>
+      <div class="field"><label>意向岗位 *</label><input id="p-role"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>工作年限</label>
+        <select id="p-exp"><option>应届</option><option>1-3年</option><option>3-5年</option><option>5-10年</option><option>10年+</option></select>
+      </div>
+      <div class="field"><label>期望薪资（K）</label><input id="p-salary"></div>
+    </div>
+    <div class="field"><label>技能标签（AI 已预选，可调整）</label>
+      <div class="tag-row" id="parsed-tags">
+        <span class="tag" onclick="tt(this)">Java</span><span class="tag" onclick="tt(this)">Python</span><span class="tag" onclick="tt(this)">React</span><span class="tag" onclick="tt(this)">Vue</span><span class="tag" onclick="tt(this)">产品设计</span><span class="tag" onclick="tt(this)">用户研究</span><span class="tag" onclick="tt(this)">数据分析</span><span class="tag" onclick="tt(this)">SQL</span><span class="tag" onclick="tt(this)">运营策划</span><span class="tag" onclick="tt(this)">新媒体</span><span class="tag" onclick="tt(this)">销售</span><span class="tag" onclick="tt(this)">客服</span><span class="tag" onclick="tt(this)">财务</span><span class="tag" onclick="tt(this)">人力资源</span><span class="tag" onclick="tt(this)">项目管理</span><span class="tag" onclick="tt(this)">UI/UX</span><span class="tag" onclick="tt(this)">市场营销</span><span class="tag" onclick="tt(this)">法务</span>
+      </div>
+      <input placeholder="自定义技能，回车添加" onkeydown="addCustom(event,'parsed-tags')" style="margin-top:7px">
+    </div>
+    <div class="field"><label>状态</label>
+      <select id="p-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
+    </div>
+    <div class="field"><label>教育背景（AI 提取）</label><textarea id="p-education" style="height:56px"></textarea></div>
+    <div class="field"><label>项目 / 实习经历（AI 逐条提取，可编辑）</label>
+      <div id="p-projects-list" class="proj-list"></div>
+    </div>
+    <div class="field"><label>证书 / 语言成绩（AI 提取）</label><input id="p-certificates"></div>
+    <div class="field"><label>完整摘要（AI 生成，200字以内）</label><textarea id="p-note" style="height:80px"></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" onclick="saveParsed()">✓ 保存至人才库</button>
+      <button class="btn btn-s" onclick="resetUpload()">重新上传</button>
+    </div>
+  </div>
+</div>
+
+<!-- 查询 -->
+<div class="panel" id="p-search">
+  <div class="search-row">
+    <input placeholder="搜索姓名、岗位、技能..." oninput="doSearch()">
+    <select onchange="doSearch()" id="f-filter">
+      <option value="">全部状态</option><option>可联系</option><option>在职观望</option><option>已入职他司</option>
+    </select>
+  </div>
+  <div id="search-list"><div class="empty">在上方输入关键词搜索</div></div>
+</div>
+
+<!-- 匹配 -->
+<div class="panel" id="p-match">
+  <div class="notice">填写新岗位需求，系统自动从人才库匹配最合适的候选人（规则打分 + 技能语义权重）</div>
+  <div class="grid2">
+    <div class="field"><label>岗位名称 *</label><input id="m-role" placeholder="如：高级前端工程师"></div>
+    <div class="field"><label>要求年限</label>
+      <select id="m-exp"><option value="">不限</option><option>应届</option><option>1-3年</option><option>3-5年</option><option>5-10年</option><option>10年+</option></select>
+    </div>
+  </div>
+  <div class="field"><label>必要技能</label>
+    <div class="tag-row" id="m-tags">
+      <span class="tag" onclick="tt(this)">Java</span><span class="tag" onclick="tt(this)">Python</span><span class="tag" onclick="tt(this)">React</span><span class="tag" onclick="tt(this)">Vue</span><span class="tag" onclick="tt(this)">产品设计</span><span class="tag" onclick="tt(this)">用户研究</span><span class="tag" onclick="tt(this)">数据分析</span><span class="tag" onclick="tt(this)">SQL</span><span class="tag" onclick="tt(this)">运营策划</span><span class="tag" onclick="tt(this)">新媒体</span><span class="tag" onclick="tt(this)">销售</span><span class="tag" onclick="tt(this)">客服</span><span class="tag" onclick="tt(this)">财务</span><span class="tag" onclick="tt(this)">人力资源</span><span class="tag" onclick="tt(this)">项目管理</span><span class="tag" onclick="tt(this)">UI/UX</span><span class="tag" onclick="tt(this)">市场营销</span><span class="tag" onclick="tt(this)">法务</span>
+    </div>
+  </div>
+  <button class="btn btn-p" onclick="doMatch()" style="margin-bottom:1.25rem">开始匹配</button>
+  <div id="match-list"></div>
+</div>
+
+</div>
+
+<!-- 弹层查看简历原图 -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+  <img id="lightbox-img" src="" alt="简历原图">
+</div>
+
+<script>
+// ===== API 层（通过 Vercel Serverless 代理，不暴露任何 key） =====
+const APIKEY_KEY = 'tp_openai_key';
+let candidates = [];
+
+async function loadCandidates(){
+  const r = await fetch('/api/candidates');
+  if(!r.ok) throw new Error('加载失败 '+r.status);
+  const data = await r.json();
+  candidates = data.map(dbToLocal);
+}
+
+async function insertCandidate(cd){
+  const r = await fetch('/api/candidates',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(localToDb(cd))
+  });
+  const data = await r.json();
+  if(!r.ok) throw new Error(data.error||'保存失败');
+  candidates.unshift(cd);
+}
+
+async function uploadResumeImg(file){
+  const fd = new FormData();
+  fd.append('file', file, file.name);
+  const r = await fetch('/api/upload',{method:'POST',body:fd});
+  const data = await r.json();
+  if(!r.ok) throw new Error(data.error||'图片上传失败');
+  return data.url;
+}
+
+// 本地对象 → 数据库行
+function localToDb(cd){
+  return {
+    id: cd.id,
+    name: cd.name,
+    role: cd.role,
+    phone: cd.phone||'',
+    email: cd.email||'',
+    exp: cd.exp||'',
+    salary: cd.salary||'',
+    status: cd.status||'可联系',
+    skills: cd.skills||[],
+    education: cd.education||'',
+    projects: cd.projects||[],
+    certificates: cd.certificates||'',
+    note: cd.note||'',
+    resume_img: cd.resumeImg||null,
+    added_at: cd.addedAt||new Date().toISOString(),
+    source: cd.source||'手动'
+  };
+}
+// 数据库行 → 本地对象
+function dbToLocal(row){
+  return {
+    id: row.id,
+    name: row.name,
+    role: row.role,
+    phone: row.phone,
+    email: row.email,
+    exp: row.exp,
+    salary: row.salary,
+    status: row.status,
+    skills: row.skills||[],
+    education: row.education,
+    projects: row.projects||[],
+    certificates: row.certificates,
+    note: row.note,
+    resumeImg: row.resume_img,
+    addedAt: row.added_at,
+    source: row.source
+  };
+}
+
+// ===== 旧 localStorage 数据一次性迁移 =====
+async function migrateLocalStorage(){
+  const old=localStorage.getItem('talent_pool_v2');
+  if(!old) return;
+  let oldData;
+  try{oldData=JSON.parse(old);}catch{return;}
+  if(!oldData||!oldData.length) return;
+  const migKey='tp_migrated_v2';
+  if(localStorage.getItem(migKey)) return;
+  try{
+    for(const cd of oldData){
+      await fetch('/api/candidates',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(localToDb(cd))
+      });
+    }
+    localStorage.setItem(migKey,'1');
+    console.log(`已将 ${oldData.length} 条旧数据迁移完成`);
+  }catch(e){console.warn('迁移失败',e);}
+}
+
+function saveApiKey(v){ if(v) localStorage.setItem(APIKEY_KEY,v); }
+function getApiKey(){ return document.getElementById('api-key').value.trim() || localStorage.getItem(APIKEY_KEY)||''; }
+
+// tabs
+function sw(t){
+  const tabs=['stats','add','upload','search','match'];
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  document.querySelectorAll('.panel').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  if(t==='stats') renderStats();
+  if(t==='search') doSearch();
+  if(t==='upload'){
+    const k=localStorage.getItem(APIKEY_KEY);
+    if(k) document.getElementById('api-key').value=k;
+  }
+}
+
+// tag toggle
+function tt(el){el.classList.toggle('on');}
+function addCustom(e,containerId){
+  if(e.key!=='Enter') return;
+  const v=e.target.value.trim(); if(!v) return;
+  const s=document.createElement('span'); s.className='tag on'; s.textContent=v; s.onclick=()=>tt(s);
+  document.getElementById(containerId).appendChild(s);
+  e.target.value='';
+}
+function getSelected(containerId){ return [...document.querySelectorAll('#'+containerId+' .tag.on')].map(t=>t.textContent); }
+
+// avatar colors
+const AC=[{bg:'#E6F1FB',c:'#0C447C'},{bg:'#E1F5EE',c:'#085041'},{bg:'#FAEEDA',c:'#633806'},{bg:'#EEEDFE',c:'#3C3489'},{bg:'#EAF3DE',c:'#27500A'},{bg:'#FAECE7',c:'#712B13'}];
+function avt(name,i){const a=AC[i%AC.length];return `<div class="avatar" style="background:${a.bg};color:${a.c}">${name.slice(0,2)}</div>`;}
+function sBadge(s){const m={'可联系':'#EAF3DE:#27500A','在职观望':'#FAEEDA:#633806','已入职他司':'#E6F1FB:#0C447C','暂不考虑':'#F1EFE8:#444441'};const[bg,c]=(m[s]||'#F1EFE8:#444441').split(':');return `<span class="badge" style="background:${bg};color:${c}">${s}</span>`;}
+
+// lightbox
+function openLightbox(src){
+  document.getElementById('lightbox-img').src=src;
+  document.getElementById('lightbox').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('show');
+  document.getElementById('lightbox-img').src='';
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLightbox();});
+
+function cCard(cd,idx,score){
+  const sk=(cd.skills||[]).map(s=>`<span class="sk">${s}</span>`).join('');
+  const sc=score!==undefined?`<div><div class="match-pct">${score}%</div><div class="match-lbl">匹配度</div></div>`:'';
+  const edu=cd.education?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px">🎓 ${cd.education}</div>`:'';
+  const cert=cd.certificates?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">🏅 ${cd.certificates}</div>`:'';
+  const thumb=cd.resumeImg?`<img class="resume-thumb" src="${cd.resumeImg}" title="点击查看简历原图" onclick="event.stopPropagation();openLightbox('${cd.resumeImg}')">`:'';
+  const projs=Array.isArray(cd.projects)&&cd.projects.length
+    ?`<div class="c-projects"><div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:5px">📌 项目经历 (${cd.projects.length})</div>`
+      +cd.projects.map(p=>{
+        const t=(p.technologies||[]).join(' / ');
+        return `<div class="c-proj-item"><div class="c-proj-name">${p.name||''}${p.time?` <span style="font-weight:400;color:var(--color-text-secondary);font-size:10px">${p.time}</span>`:''}</div>${t?`<div class="c-proj-meta">${t}</div>`:''}${p.description?`<div style="font-size:11px;color:var(--color-text-primary);margin-top:3px;line-height:1.55">${p.description}</div>`:''}</div>`;
+      }).join('')+'</div>'
+    :'';
+  return `<div class="c-card${score>=70?' border-match':''}">
+    <div class="c-head">${avt(cd.name,idx)}<div style="flex:1"><div class="c-name">${cd.name} ${sBadge(cd.status)}</div><div class="c-sub">${cd.role} · ${cd.exp}${cd.salary?' · '+cd.salary+'K':''}</div></div>${thumb}${sc}</div>
+    ${sk?`<div class="skills">${sk}</div>`:''}
+    ${edu}${cert}${projs}
+    ${cd.note?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;border-top:0.5px solid var(--color-border-tertiary);padding-top:6px">${cd.note.slice(0,120)}${cd.note.length>120?'...':''}</div>`:''}
+  </div>`;
+}
+
+function renderStats(){
+  const now=Date.now();
+  document.getElementById('s-total').textContent=candidates.length;
+  document.getElementById('s-avail').textContent=candidates.filter(c=>c.status==='可联系').length;
+  document.getElementById('s-cats').textContent=new Set(candidates.map(c=>c.role.split(/[、，,\s]/)[0])).size;
+  document.getElementById('s-recent').textContent=candidates.filter(c=>now-new Date(c.addedAt)<30*864e5).length;
+  const el=document.getElementById('recent-list');
+  el.innerHTML=candidates.length?candidates.slice(-5).reverse().map((c,i)=>cCard(c,i)).join(''):'<div class="empty">暂无候选人，去「AI 解析简历」或「手动录入」添加</div>';
+}
+
+async function saveCandidate(){
+  const name=document.getElementById('f-name').value.trim();
+  const role=document.getElementById('f-role').value.trim();
+  if(!name||!role){alert('请填写姓名和意向岗位');return;}
+  const cd={id:Date.now(),name,role,phone:document.getElementById('f-phone').value.trim(),email:document.getElementById('f-email').value.trim(),exp:document.getElementById('f-exp').value,salary:document.getElementById('f-salary').value.trim(),status:document.getElementById('f-status').value,skills:getSelected('add-tags'),education:'',projects:[],certificates:'',note:document.getElementById('f-note').value.trim(),resumeImg:null,addedAt:new Date().toISOString(),source:'手动'};
+  try{
+    await insertCandidate(cd);
+    clearForm(); sw('stats');
+  }catch(e){alert('保存失败：'+e.message);}
+}
+function clearForm(){['f-name','f-phone','f-email','f-role','f-salary','f-note'].forEach(id=>document.getElementById(id).value='');document.querySelectorAll('#add-tags .tag.on').forEach(t=>t.classList.remove('on'));}
+
+// ===== AI 解析 =====
+let currentFileData=null, currentFileType=null, currentFile=null;
+
+function onDrag(e,over){e.preventDefault();document.getElementById('drop-zone').classList.toggle('drag',over);}
+function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f) handleFile(f);}
+function onFileSelect(e){const f=e.target.files[0];if(f) handleFile(f);}
+
+function handleFile(file){
+  const isImg=file.type.startsWith('image/');
+  const isPdf=file.type==='application/pdf';
+  if(!isImg&&!isPdf){alert('请上传图片（JPG/PNG）或 PDF 文件');return;}
+
+  // show preview
+  const pa=document.getElementById('file-preview-area');
+  const sizeStr=(file.size/1024).toFixed(0)+'KB';
+  if(isImg){
+    const url=URL.createObjectURL(file);
+    pa.innerHTML=`<div class="file-preview"><img class="file-thumb" src="${url}"><div><div class="file-name">${file.name}</div><div class="file-size">${sizeStr}</div></div></div>`;
+  } else {
+    pa.innerHTML=`<div class="file-preview"><div class="file-thumb-pdf">PDF</div><div><div class="file-name">${file.name}</div><div class="file-size">${sizeStr}</div></div></div>`;
+  }
+
+  currentFile=file;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    currentFileData=ev.target.result.split(',')[1];
+    currentFileType=file.type;
+    parseResume();
+  };
+  reader.readAsDataURL(file);
+}
+
+async function parseResume(){
+  const st=document.getElementById('parse-status');
+  const ra=document.getElementById('parse-result-area');
+  document.getElementById('parsed-form').style.display='none';
+  ra.innerHTML='';
+  st.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:13px;color:var(--color-text-secondary)"><span>AI 正在识别简历<span class="loading-dots"></span></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
+
+  // animate progress
+  let pct=0; const pint=setInterval(()=>{pct=Math.min(pct+(Math.random()*8),85);document.getElementById('prog')&&(document.getElementById('prog').style.width=pct+'%');},300);
+
+  const isImg=currentFileType.startsWith('image/');
+  const isPdf=currentFileType==='application/pdf';
+
+  if(isPdf){
+    clearInterval(pint);
+    st.innerHTML='<div style="font-size:12px;color:#A32D2D;padding:6px 0">OpenAI 模式暂不支持 PDF 直接解析，请将 PDF 页面截图成 JPG/PNG 后上传。</div>';
+    return;
+  }
+
+  const apiKey=getApiKey();
+  if(!apiKey){
+    clearInterval(pint);
+    st.innerHTML='<div style="font-size:12px;color:#A32D2D;padding:6px 0">请先填写 OpenAI API Key</div>';
+    return;
+  }
+
+  const contentBlock = {
+    type:'image_url',
+    image_url:{url:`data:${currentFileType};base64,${currentFileData}`}
+  };
+
+  const prompt=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。注意：projects 必须逐条列出简历中所有项目经历，一个也不要省略。
+{
+  "name": "候选人姓名",
+  "phone": "手机号，没有则空字符串",
+  "email": "邮箱，没有则空字符串",
+  "role": "意向岗位，若简历未明硬写则根据技能和经历合理推断",
+  "exp": "工作年限，从这几个选项中选最接近的：应届/1-3年/3-5年/5-10年/10年+",
+  "salary": "期望薪资，只写数字范围如 15-20，没有则空字符串",
+  "skills": ["技能1","技能2"],
+  "education": {
+    "school": "学校名称",
+    "major": "专业",
+    "duration": "就读时间，如 2021.09-2025.06",
+    "honors": "奖学金、GPA、荣誉等，没有则空字符串"
+  },
+  "projects": [
+    {
+      "name": "项目名称",
+      "time": "时间，如 2024.03",
+      "technologies": ["技术1","技术2"],
+      "description": "详细职责与成果，直接复制简历原文描述，不要缩写"
+    }
+  ],
+  "certificates": "证书、语言成绩（如雅思7分、四六级、计算机二级等），没有则空字符串",
+  "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、项目、证书"
+}`;
+
+  try {
+    const resp=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      body:JSON.stringify({
+        model:'gpt-4.1',
+        max_tokens:1000,
+        messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]
+      })
+    });
+    clearInterval(pint);
+    if(document.getElementById('prog')) document.getElementById('prog').style.width='100%';
+
+    const data=await resp.json();
+    if(data.error){throw new Error(data.error.message);}
+
+    let raw=data.choices?.[0]?.message?.content||'';
+    raw=raw.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+
+    st.innerHTML='<div style="font-size:12px;color:#0F6E56;padding:6px 0">✓ 解析完成，请确认以下信息</div>';
+    showParsedForm(parsed);
+  } catch(err){
+    clearInterval(pint);
+    st.innerHTML=`<div style="font-size:12px;color:#A32D2D;padding:6px 0">解析失败：${err.message}。请检查文件清晰度或手动录入。</div>`;
+  }
+}
+
+const EXP_OPTS=['应届','1-3年','3-5年','5-10年','10年+'];
+
+// 项目卡片渲染
+function renderProjCard(proj, idx, editable){
+  const techs=(proj.technologies||[]).map(t=>`<span>${t}</span>`).join('');
+  const bodyId=`pb-${Date.now()}-${idx}`;
+  return `<div class="proj-item">
+    <div class="proj-head" onclick="toggleProj(this)">
+      <span class="proj-title">${proj.name||'未命名项目'}</span>
+      <span class="proj-time">${proj.time||''}</span>
+      <span class="proj-toggle">▼</span>
+    </div>
+    <div class="proj-body open">
+      <div class="proj-tech">${techs}</div>
+      ${editable
+        ?`<textarea class="proj-desc" style="width:100%;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 8px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical;min-height:60px" data-proj-idx="${idx}">${proj.description||''}</textarea>`
+        :`<div class="proj-desc">${proj.description||''}</div>`
+      }
+    </div>
+  </div>`;
+}
+function toggleProj(head){
+  const body=head.nextElementSibling;
+  const tog=head.querySelector('.proj-toggle');
+  body.classList.toggle('open');
+  tog.style.transform=body.classList.contains('open')?'':'rotate(-90deg)';
+}
+
+function showParsedForm(p){
+  document.getElementById('p-name').value=p.name||'';
+  document.getElementById('p-phone').value=p.phone||'';
+  document.getElementById('p-email').value=p.email||'';
+  document.getElementById('p-role').value=p.role||'';
+  const ei=EXP_OPTS.indexOf(p.exp); document.getElementById('p-exp').selectedIndex=ei>=0?ei:0;
+  document.getElementById('p-salary').value=p.salary||'';
+  // education
+  const edu=p.education||{};
+  const eduStr=typeof edu==='string'?edu:[edu.school,edu.major,edu.duration,edu.honors].filter(Boolean).join(' | ');
+  document.getElementById('p-education').value=eduStr;
+  // projects
+  const projs=Array.isArray(p.projects)?p.projects:[];
+  const pl=document.getElementById('p-projects-list');
+  pl.innerHTML=projs.length?projs.map((pr,i)=>renderProjCard(pr,i,true)).join(''):'<div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0">未提取到项目经历</div>';
+  document.getElementById('p-certificates').value=p.certificates||'';
+  document.getElementById('p-note').value=p.summary||'';
+  // match tags
+  document.querySelectorAll('#parsed-tags .tag').forEach(t=>{
+    const matched=p.skills&&p.skills.some(s=>s.includes(t.textContent)||t.textContent.includes(s));
+    t.classList.toggle('on',!!matched);
+  });
+  // add extra skills not in preset tags
+  if(p.skills){
+    const preset=[...document.querySelectorAll('#parsed-tags .tag')].map(t=>t.textContent);
+    p.skills.forEach(sk=>{
+      if(!preset.some(pt=>pt.includes(sk)||sk.includes(pt))){
+        const s=document.createElement('span');s.className='tag on';s.textContent=sk;s.onclick=()=>tt(s);
+        document.getElementById('parsed-tags').appendChild(s);
+      }
+    });
+  }
+  document.getElementById('parsed-form').style.display='block';
+}
+
+async function saveParsed(){
+  const name=document.getElementById('p-name').value.trim();
+  const role=document.getElementById('p-role').value.trim();
+  if(!name||!role){alert('请至少填写姓名和岗位');return;}
+  const btn=document.querySelector('#parsed-form .btn-p');
+  btn.disabled=true; btn.textContent='保存中...';
+  try{
+    // 上传简历图片到 Supabase Storage
+    let resumeImgUrl=null;
+    if(currentFile&&currentFile.type.startsWith('image/')){
+      resumeImgUrl=await uploadResumeImg(currentFile);
+    }
+    // 从卡片中读取编辑后的项目详情
+    const projItems=[...document.querySelectorAll('#p-projects-list .proj-item')];
+    const projects=projItems.map((item)=>{
+      const title=item.querySelector('.proj-title').textContent;
+      const time=item.querySelector('.proj-time').textContent;
+      const techs=[...item.querySelectorAll('.proj-tech span')].map(s=>s.textContent);
+      const ta=item.querySelector('textarea[data-proj-idx]');
+      return {name:title,time,technologies:techs,description:ta?ta.value:''};
+    });
+    const cd={id:Date.now(),name,role,phone:document.getElementById('p-phone').value.trim(),email:document.getElementById('p-email').value.trim(),exp:document.getElementById('p-exp').value,salary:document.getElementById('p-salary').value.trim(),status:document.getElementById('p-status').value,skills:getSelected('parsed-tags'),education:document.getElementById('p-education').value.trim(),projects,certificates:document.getElementById('p-certificates').value.trim(),note:document.getElementById('p-note').value.trim(),resumeImg:resumeImgUrl,addedAt:new Date().toISOString(),source:'AI解析'};
+    await insertCandidate(cd);
+    resetUpload(); sw('stats');
+  }catch(e){
+    alert('保存失败：'+e.message);
+  }finally{
+    btn.disabled=false; btn.textContent='✓ 保存至人才库';
+  }
+}
+function resetUpload(){
+  document.getElementById('file-preview-area').innerHTML='';
+  document.getElementById('parse-status').innerHTML='';
+  document.getElementById('parse-result-area').innerHTML='';
+  document.getElementById('parsed-form').style.display='none';
+  document.getElementById('file-input').value='';
+  document.getElementById('p-education').value='';
+  document.getElementById('p-projects-list').innerHTML='';
+  document.getElementById('p-certificates').value='';
+  currentFileData=null; currentFile=null;
+}
+
+// search
+function doSearch(){
+  const q=(document.querySelector('#p-search .search-row input')||{}).value||'';
+  const st=document.getElementById('f-filter').value;
+  const ql=q.toLowerCase();
+  let res=candidates.filter(c=>{
+    const projText=(c.projects||[]).map(p=>[p.name,p.description,...(p.technologies||[])].join(' ')).join(' ');
+    const mq=!ql||[c.name,c.role,...(c.skills||[]),c.note,c.education,c.certificates,projText].join(' ').toLowerCase().includes(ql);
+    const ms=!st||c.status===st;
+    return mq&&ms;
+  });
+  document.getElementById('search-list').innerHTML=res.length?res.map((c,i)=>cCard(c,i)).join(''):'<div class="empty">没有找到符合条件的候选人</div>';
+}
+document.querySelector('#p-search .search-row input') && document.querySelector('#p-search .search-row input').addEventListener('input',doSearch);
+
+// match
+const expO=['应届','1-3年','3-5年','5-10年','10年+'];
+function doMatch(){
+  const role=document.getElementById('m-role').value.trim();
+  if(!role){alert('请填写岗位名称');return;}
+  const reqSkills=getSelected('m-tags');
+  const reqExp=document.getElementById('m-exp').value;
+  const scored=candidates.map((c,i)=>{
+    let sc=0;
+    if(c.role.includes(role)||role.includes(c.role.split(/[、，,\s]/)[0])) sc+=30;
+    else if([...role].some(ch=>c.role.includes(ch))) sc+=10;
+    if(reqSkills.length){const m=reqSkills.filter(s=>c.skills.includes(s)).length;sc+=Math.round(m/reqSkills.length*50);}
+    else sc+=20;
+    if(reqExp){const ci=expO.indexOf(c.exp),ri=expO.indexOf(reqExp);if(ci===ri)sc+=20;else if(ci>ri)sc+=10;}
+    else sc+=10;
+    if(c.status==='可联系') sc+=5;
+    return{c,i,sc:Math.min(100,sc)};
+  }).filter(x=>x.sc>15).sort((a,b)=>b.sc-a.sc);
+  const el=document.getElementById('match-list');
+  el.innerHTML=scored.length?`<div style="font-size:13px;font-weight:500;margin-bottom:10px">为「${role}」找到 ${scored.length} 位候选人</div>`+scored.slice(0,10).map(({c,i,sc})=>cCard(c,i,sc)).join(''):'<div class="empty">人才库中暂无匹配候选人</div>';
+}
+
+// ===== 初始化 =====
+(async()=>{
+  document.getElementById('recent-list').innerHTML='<div class="empty">正在连接数据库<span class="loading-dots"></span></div>';
+  await migrateLocalStorage();
+  await loadCandidates();
+  renderStats();
+})();
+</script>
