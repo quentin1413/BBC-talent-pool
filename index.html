@@ -73,6 +73,14 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 /* project cards */
 .proj-list{display:flex;flex-direction:column;gap:7px;margin-top:6px}
 .proj-item{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
+/* 设置面板 */
+.settings-section{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:16px;margin-bottom:14px}
+.settings-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.settings-desc{font-size:11px;color:var(--color-text-secondary);margin-bottom:10px}
+.settings-tags{display:flex;flex-wrap:wrap;gap:6px}
+.st-tag{display:inline-flex;align-items:center;gap:4px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:3px 10px;font-size:12px;cursor:default}
+.st-tag .del{cursor:pointer;color:var(--color-text-secondary);font-size:14px;line-height:1;margin-left:2px}
+.st-tag .del:hover{color:#c0392b}
 .proj-head{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;cursor:pointer;gap:8px}
 .proj-title{font-size:12px;font-weight:500;color:var(--color-text-primary);flex:1}
 .proj-time{font-size:11px;color:var(--color-text-secondary);flex-shrink:0}
@@ -105,6 +113,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
   <button class="tab" onclick="sw('upload')">📄 AI 解析简历</button>
   <button class="tab" onclick="sw('search')">查询</button>
   <button class="tab" onclick="sw('match')">岗位匹配</button>
+  <button class="tab" onclick="sw('settings')">⚙ 设置</button>
 </div>
 
 <!-- 总览 -->
@@ -136,9 +145,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
     <div class="field"><label>期望薪资（K）</label><input id="f-salary" placeholder="15-20"></div>
   </div>
   <div class="field"><label>技能标签</label>
-    <div class="tag-row" id="add-tags">
-      <span class="tag" onclick="tt(this)">Java</span><span class="tag" onclick="tt(this)">Python</span><span class="tag" onclick="tt(this)">React</span><span class="tag" onclick="tt(this)">Vue</span><span class="tag" onclick="tt(this)">产品设计</span><span class="tag" onclick="tt(this)">用户研究</span><span class="tag" onclick="tt(this)">数据分析</span><span class="tag" onclick="tt(this)">SQL</span><span class="tag" onclick="tt(this)">运营策划</span><span class="tag" onclick="tt(this)">新媒体</span><span class="tag" onclick="tt(this)">销售</span><span class="tag" onclick="tt(this)">客服</span><span class="tag" onclick="tt(this)">财务</span><span class="tag" onclick="tt(this)">人力资源</span><span class="tag" onclick="tt(this)">项目管理</span><span class="tag" onclick="tt(this)">UI/UX</span><span class="tag" onclick="tt(this)">市场营销</span><span class="tag" onclick="tt(this)">法务</span>
-    </div>
+    <div class="tag-row" id="add-tags"></div>
     <input placeholder="自定义技能，回车添加" onkeydown="addCustom(event,'add-tags')" style="margin-top:7px">
   </div>
   <div class="field"><label>状态</label>
@@ -188,9 +195,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
       <div class="field"><label>期望薪资（K）</label><input id="p-salary"></div>
     </div>
     <div class="field"><label>技能标签（AI 已预选，可调整）</label>
-      <div class="tag-row" id="parsed-tags">
-        <span class="tag" onclick="tt(this)">Java</span><span class="tag" onclick="tt(this)">Python</span><span class="tag" onclick="tt(this)">React</span><span class="tag" onclick="tt(this)">Vue</span><span class="tag" onclick="tt(this)">产品设计</span><span class="tag" onclick="tt(this)">用户研究</span><span class="tag" onclick="tt(this)">数据分析</span><span class="tag" onclick="tt(this)">SQL</span><span class="tag" onclick="tt(this)">运营策划</span><span class="tag" onclick="tt(this)">新媒体</span><span class="tag" onclick="tt(this)">销售</span><span class="tag" onclick="tt(this)">客服</span><span class="tag" onclick="tt(this)">财务</span><span class="tag" onclick="tt(this)">人力资源</span><span class="tag" onclick="tt(this)">项目管理</span><span class="tag" onclick="tt(this)">UI/UX</span><span class="tag" onclick="tt(this)">市场营销</span><span class="tag" onclick="tt(this)">法务</span>
-      </div>
+      <div class="tag-row" id="parsed-tags"></div>
       <input placeholder="自定义技能，回车添加" onkeydown="addCustom(event,'parsed-tags')" style="margin-top:7px">
     </div>
     <div class="field"><label>状态</label>
@@ -230,12 +235,35 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
     </div>
   </div>
   <div class="field"><label>必要技能</label>
-    <div class="tag-row" id="m-tags">
-      <span class="tag" onclick="tt(this)">Java</span><span class="tag" onclick="tt(this)">Python</span><span class="tag" onclick="tt(this)">React</span><span class="tag" onclick="tt(this)">Vue</span><span class="tag" onclick="tt(this)">产品设计</span><span class="tag" onclick="tt(this)">用户研究</span><span class="tag" onclick="tt(this)">数据分析</span><span class="tag" onclick="tt(this)">SQL</span><span class="tag" onclick="tt(this)">运营策划</span><span class="tag" onclick="tt(this)">新媒体</span><span class="tag" onclick="tt(this)">销售</span><span class="tag" onclick="tt(this)">客服</span><span class="tag" onclick="tt(this)">财务</span><span class="tag" onclick="tt(this)">人力资源</span><span class="tag" onclick="tt(this)">项目管理</span><span class="tag" onclick="tt(this)">UI/UX</span><span class="tag" onclick="tt(this)">市场营销</span><span class="tag" onclick="tt(this)">法务</span>
-    </div>
+    <div class="tag-row" id="m-tags"></div>
   </div>
   <button class="btn btn-p" onclick="doMatch()" style="margin-bottom:1.25rem">开始匹配</button>
   <div id="match-list"></div>
+</div>
+
+<!-- 设置 -->
+<div class="panel" id="p-settings">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px">自定义技能和岗位选项，所有表单的标签都会同步更新。</div>
+
+  <div class="settings-section">
+    <div class="settings-title">🏷 岗位选项</div>
+    <div class="settings-desc">若删除预设岗位后可点「恢复预设」重置</div>
+    <div class="settings-tags" id="st-roles"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+      <input id="st-role-input" placeholder="新岗位名称，回车添加" onkeydown="addSettingItem(event,'role')" style="flex:1">
+      <button class="btn btn-s" style="white-space:nowrap" onclick="resetDefault('role')">恢复预设</button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">🏠 技能选项</div>
+    <div class="settings-desc">若删除预设技能后可点「恢复预设」重置</div>
+    <div class="settings-tags" id="st-skills"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+      <input id="st-skill-input" placeholder="新技能名称，回车添加" onkeydown="addSettingItem(event,'skill')" style="flex:1">
+      <button class="btn btn-s" style="white-space:nowrap" onclick="resetDefault('skill')">恢复预设</button>
+    </div>
+  </div>
 </div>
 
 </div>
@@ -249,6 +277,113 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 <script>
 // ===== API 层（通过 Vercel Serverless 代理，不暴露任何 key） =====
 const APIKEY_KEY = 'tp_openai_key';
+const SK_SKILLS = 'tp_custom_skills';
+const SK_ROLES  = 'tp_custom_roles';
+
+// ===== 预设常量 =====
+const DEFAULT_SKILLS = [
+  // 通用
+  'Java','Python','JavaScript','React','Vue',
+  'SQL','数据分析','项目管理','UI/UX','人力资源','财务','法务',
+  // 跨境电商
+  'Amazon运营','eBay运营','Shopee运营','Lazada运营','Temu运营','TikTok Shop',
+  'Shopify建站','WordPress','WooCommerce',
+  'Google Ads','Facebook Ads','Meta投投','Google SEO','Listing优化',
+  'A+页面设计','ERP系统','飞书','SkyWard','Sellics',
+  '品牌营销','社媒运营','红人合作','内容营销','电商运营',
+  '供应链管理','国际物流','客户服务','央样管理','选品分析',
+  '数据分析','经营分析','Power BI','Excel数据','Tableau',
+  '英语读写','日语','韩语','法语','平面设计','视频剪辑','PS/AI',
+  '销售','客服','运营策划','新媒体','市场营销','产品设计','用户研究'
+];
+
+const DEFAULT_ROLES = [
+  // 跨境电商岗位
+  'Amazon运营专员','Amazon运营主管','eBay运营专员','Shopee运营专员',
+  'Lazada运营专员','Temu运营专员','TikTok运营专员',
+  '多平台电商运营','跨境电商运营','电商运营主管',
+  '展示设计师','Listing优化专员','站外广告专员',
+  'Google SEO专员','内容营销','社媒居左营销',
+  '供应链专员','采购专员','物流专员','仓储管理',
+  '客服专员','天猫客服','电商客服主管',
+  '数据分析师','选品分析师','运营数据分析',
+  '电商产品经理','品牌运营主管','红人商务',
+  // 通用岗位
+  '产品经理','项目经理','市场营销','市场专员',
+  '销售主管','销售专员','财务专员','人力资源',
+  '前端开发','后端开发','全栈开发','设计师','数据分析师'
+];
+
+// 读写用户自定义列表
+function getSkills(){ return JSON.parse(localStorage.getItem(SK_SKILLS)||'null') || DEFAULT_SKILLS.slice(); }
+function getRoles(){  return JSON.parse(localStorage.getItem(SK_ROLES) ||'null') || DEFAULT_ROLES.slice(); }
+function saveSkills(arr){ localStorage.setItem(SK_SKILLS, JSON.stringify(arr)); }
+function saveRoles(arr){  localStorage.setItem(SK_ROLES,  JSON.stringify(arr)); }
+
+// 渲染技能标签到指定容器
+function renderTagsTo(containerId, selecteds=[], editable=true){
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  const skills = getSkills();
+  box.innerHTML = skills.map(sk => {
+    const on = selecteds.some(s=>s===sk||s.includes(sk)||sk.includes(s)) ? ' on' : '';
+    return `<span class="tag${on}" onclick="tt(this)">${sk}</span>`;
+  }).join('');
+}
+
+// 渲染设置面板标签
+function renderSettingsTags(){
+  const skills = getSkills();
+  const roles  = getRoles();
+  document.getElementById('st-skills').innerHTML = skills.map((s,i)=>
+    `<span class="st-tag">${s}<span class="del" onclick="delSettingItem('skill',${i})">×</span></span>`
+  ).join('');
+  document.getElementById('st-roles').innerHTML  = roles.map((r,i)=>
+    `<span class="st-tag">${r}<span class="del" onclick="delSettingItem('role',${i})">×</span></span>`
+  ).join('');
+}
+
+function delSettingItem(type, idx){
+  if(type==='skill'){
+    const arr=getSkills(); arr.splice(idx,1); saveSkills(arr);
+  } else {
+    const arr=getRoles();  arr.splice(idx,1); saveRoles(arr);
+  }
+  renderSettingsTags();
+  renderTagsTo('add-tags');
+  renderTagsTo('parsed-tags');
+  renderTagsTo('m-tags');
+}
+
+function addSettingItem(e, type){
+  if(e.key!=='Enter') return;
+  const inputId = type==='skill' ? 'st-skill-input' : 'st-role-input';
+  const val = document.getElementById(inputId).value.trim();
+  if(!val) return;
+  if(type==='skill'){
+    const arr=getSkills();
+    if(!arr.includes(val)){ arr.push(val); saveSkills(arr); }
+  } else {
+    const arr=getRoles();
+    if(!arr.includes(val)){ arr.push(val); saveRoles(arr); }
+  }
+  document.getElementById(inputId).value='';
+  renderSettingsTags();
+  renderTagsTo('add-tags');
+  renderTagsTo('parsed-tags');
+  renderTagsTo('m-tags');
+}
+
+function resetDefault(type){
+  if(!confirm('确定恢复预设？自定义添加的内容也会一并清除。')) return;
+  if(type==='skill') localStorage.removeItem(SK_SKILLS);
+  else               localStorage.removeItem(SK_ROLES);
+  renderSettingsTags();
+  renderTagsTo('add-tags');
+  renderTagsTo('parsed-tags');
+  renderTagsTo('m-tags');
+}
+
 let candidates = [];
 
 async function loadCandidates(){
@@ -348,11 +483,12 @@ function getApiKey(){ return document.getElementById('api-key').value.trim() || 
 
 // tabs
 function sw(t){
-  const tabs=['stats','add','upload','search','match'];
+  const tabs=['stats','add','upload','search','match','settings'];
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
   document.querySelectorAll('.panel').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
   if(t==='stats') renderStats();
   if(t==='search') doSearch();
+  if(t==='settings') renderSettingsTags();
   if(t==='upload'){
     const k=localStorage.getItem(APIKEY_KEY);
     if(k) document.getElementById('api-key').value=k;
@@ -594,14 +730,11 @@ function showParsedForm(p){
   pl.innerHTML=projs.length?projs.map((pr,i)=>renderProjCard(pr,i,true)).join(''):'<div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0">未提取到项目经历</div>';
   document.getElementById('p-certificates').value=p.certificates||'';
   document.getElementById('p-note').value=p.summary||'';
-  // match tags
-  document.querySelectorAll('#parsed-tags .tag').forEach(t=>{
-    const matched=p.skills&&p.skills.some(s=>s.includes(t.textContent)||t.textContent.includes(s));
-    t.classList.toggle('on',!!matched);
-  });
-  // add extra skills not in preset tags
+  // 先渲染全部预设标签，匹配的自动选中
+  renderTagsTo('parsed-tags', p.skills||[]);
+  // 添加预设中没有的额外技能
   if(p.skills){
-    const preset=[...document.querySelectorAll('#parsed-tags .tag')].map(t=>t.textContent);
+    const preset=getSkills();
     p.skills.forEach(sk=>{
       if(!preset.some(pt=>pt.includes(sk)||sk.includes(pt))){
         const s=document.createElement('span');s.className='tag on';s.textContent=sk;s.onclick=()=>tt(s);
@@ -696,6 +829,9 @@ function doMatch(){
   document.getElementById('recent-list').innerHTML='<div class="empty">正在连接数据库<span class="loading-dots"></span></div>';
   await migrateLocalStorage();
   await loadCandidates();
+  renderTagsTo('add-tags');
+  renderTagsTo('parsed-tags');
+  renderTagsTo('m-tags');
   renderStats();
 })();
 </script>
