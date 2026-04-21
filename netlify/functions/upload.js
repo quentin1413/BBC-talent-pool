@@ -1,34 +1,25 @@
-// api/upload.js — 简历图片上传代理（转发到 Supabase Storage）
-// 接收 multipart/form-data，字段名 file
-
-import { Readable } from 'stream';
+// netlify/functions/upload.js — 简历图片上传代理（转发到 Supabase Storage）
+// 环境变量：SB_URL, SB_SERVICE_KEY
 
 const SB_URL = process.env.SB_URL;
 const SB_KEY = process.env.SB_SERVICE_KEY;
 const BUCKET = 'resumes';
 
-export const config = {
-  api: { bodyParser: false }   // 关闭 Vercel 默认 body 解析，手动处理二进制
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type'
 };
-
-async function readRawBody(req) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    req.on('data', c => chunks.push(c));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
-}
 
 // 从 multipart body 中提取第一个文件
 function parseMultipart(buffer, boundary) {
   const sep = Buffer.from('--' + boundary);
   const parts = [];
-  let start = buffer.indexOf(sep) + sep.length + 2; // skip \r\n
+  let start = buffer.indexOf(sep) + sep.length + 2;
   while (start < buffer.length) {
     const end = buffer.indexOf(sep, start);
     if (end === -1) break;
-    const part = buffer.slice(start, end - 2); // trim trailing \r\n
+    const part = buffer.slice(start, end - 2);
     const headerEnd = part.indexOf('\r\n\r\n');
     if (headerEnd === -1) { start = end + sep.length + 2; continue; }
     const headerStr = part.slice(0, headerEnd).toString();
@@ -47,25 +38,31 @@ function parseMultipart(buffer, boundary) {
   return parts;
 }
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+export const handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: CORS, body: '' };
+  }
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
+  }
 
   try {
-    const contentType = req.headers['content-type'] || '';
+    const contentType = event.headers['content-type'] || '';
     const boundaryMatch = contentType.match(/boundary=(.+)$/);
-    if (!boundaryMatch) return res.status(400).json({ error: 'No boundary in content-type' });
+    if (!boundaryMatch) {
+      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'No boundary in content-type' }) };
+    }
     const boundary = boundaryMatch[1];
 
-    const rawBody = await readRawBody(req);
+    // Netlify 传入 base64 编码的 body
+    const rawBody = Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8');
     const parts = parseMultipart(rawBody, boundary);
     const filePart = parts.find(p => p.name === 'file');
-    if (!filePart) return res.status(400).json({ error: 'No file field found' });
+    if (!filePart) {
+      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'No file field found' }) };
+    }
 
-    const ext = filePart.filename.split('.').pop() || 'jpg';
+    const ext = (filePart.filename.split('.').pop() || 'jpg').toLowerCase();
     const path = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
     const uploadRes = await fetch(
@@ -84,12 +81,12 @@ export default async function handler(req, res) {
 
     if (!uploadRes.ok) {
       const err = await uploadRes.text();
-      return res.status(uploadRes.status).json({ error: err });
+      return { statusCode: uploadRes.status, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: err }) };
     }
 
     const publicUrl = `${SB_URL}/storage/v1/object/public/${BUCKET}/${path}`;
-    return res.status(200).json({ url: publicUrl });
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ url: publicUrl }) };
   } catch (e) {
-    return res.status(500).json({ error: e.message });
+    return { statusCode: 500, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: e.message }) };
   }
-}
+};
