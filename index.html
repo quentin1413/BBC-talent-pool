@@ -114,6 +114,12 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
   s.onload=function(){ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; };
   document.head.appendChild(s);
 })();
+// 异步加载 SheetJS，不阻塞主脚本
+(function(){
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  document.head.appendChild(s);
+})();
 </script>
 
 <div class="wrap">
@@ -140,6 +146,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
       <span style="font-size:13px;color:var(--color-text-secondary)">💾 数据备份</span>
       <div style="display:flex;gap:8px">
         <button class="btn btn-s" onclick="exportData()">↓ 导出 JSON</button>
+        <button class="btn btn-s" onclick="exportExcel()" style="background:#1D6F42;color:#fff;border-color:#1D6F42">↓ 导出 Excel</button>
         <label class="btn btn-s" style="cursor:pointer;margin:0">↑ 导入恢复<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
       </div>
     </div>
@@ -635,6 +642,50 @@ function downloadTemplate(e){
   URL.revokeObjectURL(a.href);
 }
 
+function exportExcel(){
+  if(!candidates.length){ alert('暂无候选人数据可导出'); return; }
+  if(typeof XLSX==='undefined'){ alert('Excel 库尚未加载，请稍候再试'); return; }
+
+  const headers = [
+    '姓名','意向岗位','联系电话','邮箱',
+    '工作年限','期望薪资(K)','状态','来源',
+    '技能标签','教育背景','证书/语言',
+    '项目经历','备注','录入时间'
+  ];
+
+  const rows = candidates.map(c => ({
+    '姓名': c.name||'',
+    '意向岗位': c.role||'',
+    '联系电话': c.phone||'',
+    '邮箱': c.email||'',
+    '工作年限': c.exp||'',
+    '期望薪资(K)': c.salary||'',
+    '状态': c.status||'',
+    '来源': c.source||'',
+    '技能标签': (c.skills||[]).join('、'),
+    '教育背景': c.education||'',
+    '证书/语言': c.certificates||'',
+    '项目经历': (c.projects||[]).map(p=>p.name+(p.time?' ('+p.time+')\uff1a':'\uff1a')+(p.description||'')).join('\n'),
+    '备注': c.note||'',
+    '录入时间': c.addedAt ? c.addedAt.slice(0,10) : ''
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows, {header: headers});
+
+  // 设列宽
+  ws['!cols'] = [
+    {wch:10},{wch:18},{wch:14},{wch:22},
+    {wch:10},{wch:12},{wch:10},{wch:8},
+    {wch:30},{wch:24},{wch:16},
+    {wch:50},{wch:20},{wch:12}
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '候选人库');
+  const ts = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `人才库_${ts}.xlsx`);
+}
+
 function exportData(){
   if(!candidates.length){ alert('暂无候选人数据可导出'); return; }
   const ts = new Date().toISOString().slice(0,10);
@@ -781,7 +832,7 @@ async function parseResume(){
 {
   "name": "候选人姓名",
   "phone": "手机号，没有则空字符串",
-  "email": "邮筱，没有则空字符串",
+  "email": "邮箱，没有则空字符串",
   "role": "意向岗位，若简历未明硬写则根据技能和经历合理推断",
   "exp": "工作年限，从这几个选项中选最接近的：应届/1-3年/3-5年/5-10年/10年+",
   "salary": "期望薪资，只写数字范围如 15-20，没有则空字符串",
