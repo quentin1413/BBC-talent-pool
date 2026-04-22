@@ -678,7 +678,7 @@ async function parseResume(){
 {
   "name": "候选人姓名",
   "phone": "手机号，没有则空字符串",
-  "email": "邮箱，没有则空字符串",
+  "email": "邮筱，没有则空字符串",
   "role": "意向岗位，若简历未明硬写则根据技能和经历合理推断",
   "exp": "工作年限，从这几个选项中选最接近的：应届/1-3年/3-5年/5-10年/10年+",
   "salary": "期望薪资，只写数字范围如 15-20，没有则空字符串",
@@ -700,8 +700,6 @@ async function parseResume(){
   "certificates": "证书、语言成绩（如雅思7分、四六级、计算机二级等），没有则空字符串",
   "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、项目、证书"
 }`;
-
-  try {
     const resp=await fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
