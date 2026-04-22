@@ -285,7 +285,11 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 </div>
 
 <script>
-// ===== API 层（通过 Netlify Functions 代理，不暴露任何 key） =====
+// ===== Supabase 直连配置（anon key 供前端读写，RLS 控制权限）=====
+const SB_URL  = 'https://iopenydyhquilvtsypjk.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvcGVueWR5aHF1aWx2dHN5cGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NDIzMzMsImV4cCI6MjA5MjMxODMzM30.i5bWmHD7-ZRxsw-_CA3DQ_eKD2qd5ejAINlxtRMP7CU';
+const SB_HDR  = { 'Content-Type':'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer '+SB_ANON };
+
 const APIKEY_KEY = 'tp_openai_key';
 const SK_SKILLS = 'tp_custom_skills';
 const SK_ROLES  = 'tp_custom_roles';
@@ -410,30 +414,41 @@ function resetDefault(type){
 let candidates = [];
 
 async function loadCandidates(){
-  const r = await fetch('/.netlify/functions/candidates');
+  const r = await fetch(`${SB_URL}/rest/v1/candidates?select=*&order=added_at.desc`,{headers:SB_HDR});
   if(!r.ok) throw new Error('加载失败 '+r.status);
   const data = await r.json();
   candidates = data.map(dbToLocal);
 }
 
 async function insertCandidate(cd){
-  const r = await fetch('/.netlify/functions/candidates',{
+  const r = await fetch(`${SB_URL}/rest/v1/candidates`,{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{...SB_HDR,'Prefer':'return=representation'},
     body:JSON.stringify(localToDb(cd))
   });
   const data = await r.json();
-  if(!r.ok) throw new Error(data.error||'保存失败');
-  candidates.unshift(cd);
+  if(!r.ok) throw new Error(data.message||data.error||'保存失败');
+  candidates.unshift(dbToLocal(Array.isArray(data)?data[0]:data));
 }
 
 async function uploadResumeImg(file){
-  const fd = new FormData();
-  fd.append('file', file, file.name);
-  const r = await fetch('/.netlify/functions/upload',{method:'POST',body:fd});
-  const data = await r.json();
-  if(!r.ok) throw new Error(data.error||'图片上传失败');
-  return data.url;
+  const ext = file.name.split('.').pop();
+  const path = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const r = await fetch(`${SB_URL}/storage/v1/object/resumes/${path}`,{
+    method:'POST',
+    headers:{
+      'apikey': SB_ANON,
+      'Authorization': 'Bearer '+SB_ANON,
+      'Content-Type': file.type,
+      'x-upsert': 'true'
+    },
+    body: file
+  });
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error(e.message||'图片上传失败');
+  }
+  return `${SB_URL}/storage/v1/object/public/resumes/${path}`;
 }
 
 // 本地对象 → 数据库行
@@ -490,9 +505,9 @@ async function migrateLocalStorage(){
   if(localStorage.getItem(migKey)) return;
   try{
     for(const cd of oldData){
-      await fetch('/.netlify/functions/candidates',{
+      await fetch(`${SB_URL}/rest/v1/candidates`,{
         method:'POST',
-        headers:{'Content-Type':'application/json'},
+        headers:{...SB_HDR,'Prefer':'return=minimal'},
         body:JSON.stringify(localToDb(cd))
       });
     }
@@ -700,16 +715,23 @@ async function parseResume(){
   "certificates": "证书、语言成绩（如雅思7分、四六级、计算机二级等），没有则空字符串",
   "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、项目、证书"
 }`;
-    const resp=await fetch('/.netlify/functions/parse',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        apiKey,
-        model:'gpt-4o-mini',
-        max_tokens:1500,
-        messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]
-      })
-    });
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+    let resp;
+    if(isLocal){
+      // 本地直连 OpenAI（无跨域限制）
+      resp=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+        body:JSON.stringify({model:'gpt-4o-mini',max_tokens:1500,messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]})
+      });
+    } else {
+      // 线上通过 Netlify Function 中转（解决 CORS）
+      resp=await fetch('/.netlify/functions/parse',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({apiKey,model:'gpt-4o-mini',max_tokens:1500,messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]})
+      });
+    }
     clearInterval(pint);
     if(document.getElementById('prog')) document.getElementById('prog').style.width='100%';
 
