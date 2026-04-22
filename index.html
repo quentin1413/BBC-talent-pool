@@ -105,7 +105,15 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 .lightbox img{max-width:90vw;max-height:90vh;border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
 .lightbox-close{position:fixed;top:18px;right:22px;font-size:28px;color:#fff;cursor:pointer;line-height:1;user-select:none}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// 异步加载 PDF.js，不阻塞主脚本
+(function(){
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  s.onload=function(){ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; };
+  document.head.appendChild(s);
+})();
+</script>
 
 <div class="wrap">
 <h2 class="sr-only">AI 人才库 — 支持简历文件上传自动解析、岗位匹配</h2>
@@ -277,10 +285,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 </div>
 
 <script>
-// PDF.js worker
-if(typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-// ===== API 层（通过 Vercel Serverless 代理，不暴露任何 key） =====
+// ===== API 层（通过 Netlify Functions 代理，不暴露任何 key） =====
 const APIKEY_KEY = 'tp_openai_key';
 const SK_SKILLS = 'tp_custom_skills';
 const SK_ROLES  = 'tp_custom_roles';
@@ -293,7 +298,7 @@ const DEFAULT_SKILLS = [
   // 跨境电商
   'Amazon运营','eBay运营','Shopee运营','Lazada运营','Temu运营','TikTok Shop',
   'Shopify建站','WordPress','WooCommerce',
-  'Google Ads','Facebook Ads','Meta投投','Google SEO','Listing优化',
+  'Google Ads','Facebook Ads','Meta广告','Google SEO','Listing优化',
   'A+页面设计','ERP系统','飞书','SkyWard','Sellics',
   '品牌营销','社媒运营','红人合作','内容营销','电商运营',
   '供应链管理','国际物流','客户服务','央样管理','选品分析',
@@ -308,7 +313,7 @@ const DEFAULT_ROLES = [
   'Lazada运营专员','Temu运营专员','TikTok运营专员',
   '多平台电商运营','跨境电商运营','电商运营主管',
   '展示设计师','Listing优化专员','站外广告专员',
-  'Google SEO专员','内容营销','社媒居左营销',
+  'Google SEO专员','内容营销','社媒运营专员',
   '供应链专员','采购专员','物流专员','仓储管理',
   '客服专员','天猫客服','电商客服主管',
   '数据分析师','选品分析师','运营数据分析',
