@@ -106,7 +106,6 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 .lightbox-close{position:fixed;top:18px;right:22px;font-size:28px;color:#fff;cursor:pointer;line-height:1;user-select:none}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 
 <div class="wrap">
 <h2 class="sr-only">AI 人才库 — 支持简历文件上传自动解析、岗位匹配</h2>
@@ -278,6 +277,9 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 </div>
 
 <script>
+// PDF.js worker
+if(typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 // ===== API 层（通过 Vercel Serverless 代理，不暴露任何 key） =====
 const APIKEY_KEY = 'tp_openai_key';
 const SK_SKILLS = 'tp_custom_skills';
