@@ -56,10 +56,11 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 .match-pct{font-size:18px;font-weight:500;color:#0F6E56;margin-left:auto;text-align:right}
 .match-lbl{font-size:10px;color:var(--color-text-secondary);text-align:right}
 .border-match{border-left:3px solid #1D9E75}
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
 .stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
 .stat-n{font-size:22px;font-weight:500}
 .stat-l{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.backup-bar{display:flex;flex-direction:column;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 12px;margin-bottom:1.5rem}
 .empty{text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:13px}
 .notice{font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 12px;margin-bottom:1rem;line-height:1.6}
 .loading-dots::after{content:'.';animation:dots 1.2s steps(3,end) infinite}
@@ -133,6 +134,19 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
     <div class="stat"><div class="stat-n" id="s-avail">0</div><div class="stat-l">可联系</div></div>
     <div class="stat"><div class="stat-n" id="s-cats">0</div><div class="stat-l">岗位类别</div></div>
     <div class="stat"><div class="stat-n" id="s-recent">0</div><div class="stat-l">近30天新增</div></div>
+  </div>
+  <div class="backup-bar">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <span style="font-size:13px;color:var(--color-text-secondary)">💾 数据备份</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s" onclick="exportData()">↓ 导出 JSON</button>
+        <label class="btn btn-s" style="cursor:pointer;margin:0">↑ 导入恢复<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+      </div>
+    </div>
+    <div style="width:100%;margin-top:7px;font-size:11px;color:var(--color-text-secondary);line-height:1.7;border-top:0.5px solid var(--color-border-tertiary);padding-top:7px">
+      📌 <b>导入说明：</b>仅支持本系统『导出 JSON』生成的文件，不支持 Excel、CSV 格式。导入时会自动按候选人 ID 去重，重复条目自动跳过，已有数据不会被覆盖。
+      若需手动构造备份文件，可 <a href="#" onclick="downloadTemplate(event)" style="color:var(--color-primary)">下载字段模板</a> 参考。
+    </div>
   </div>
   <div style="font-size:13px;font-weight:500;margin-bottom:10px">最近录入</div>
   <div id="recent-list"></div>
@@ -581,6 +595,80 @@ function cCard(cd,idx,score){
     ${edu}${cert}${projs}
     ${cd.note?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;border-top:0.5px solid var(--color-border-tertiary);padding-top:6px">${cd.note.slice(0,120)}${cd.note.length>120?'...':''}</div>`:''}
   </div>`;
+}
+
+// ===== 导出 / 导入备份 =====
+function downloadTemplate(e){
+  e.preventDefault();
+  const tpl = [
+    {
+      "id": 1700000000000,
+      "name": "张三",
+      "role": "Amazon运营专员",
+      "phone": "138xxxx1234",
+      "email": "zhangsan@example.com",
+      "exp": "1-3年",
+      "salary": "15-20",
+      "status": "可联系",
+      "skills": ["Amazon运营", "Google Ads", "Excel数据"],
+      "education": "广州大学 | 市场营销 | 2019-2023",
+      "projects": [
+        {
+          "name": "跨境非标项目实习",
+          "time": "2022.06",
+          "technologies": ["Amazon后台", "Helium10"],
+          "description": "负责店铺 Listing 优化与广告投放，单月销售额提升 30%。"
+        }
+      ],
+      "certificates": "CET6: 530分",
+      "note": "避免尺寄他人",
+      "resumeImg": "",
+      "addedAt": "2024-01-01T00:00:00.000Z",
+      "source": "手动"
+    }
+  ];
+  const blob = new Blob([JSON.stringify(tpl, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '人才库导入模板.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportData(){
+  if(!candidates.length){ alert('暂无候选人数据可导出'); return; }
+  const ts = new Date().toISOString().slice(0,10);
+  const blob = new Blob([JSON.stringify(candidates, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `人才库备份_${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  e.target.value = '';
+  let data;
+  try{
+    data = JSON.parse(await file.text());
+  }catch{
+    alert('文件格式错误，请选择有效的 JSON 备份文件'); return;
+  }
+  if(!Array.isArray(data)||!data.length){ alert('备份文件中没有候选人数据'); return; }
+  const existing = new Set(candidates.map(c=>c.id));
+  const toAdd = data.filter(c=>c.id && !existing.has(c.id));
+  if(!toAdd.length){ alert(`共 ${data.length} 条数据，全部已存在，无需导入`); return; }
+  if(!confirm(`将导入 ${toAdd.length} 条新候选人（已有的 ${data.length-toAdd.length} 条自动跳过），确定吗？`)) return;
+  const st = document.getElementById('recent-list');
+  st.innerHTML = `<div class="empty">导入中<span class="loading-dots"></span></div>`;
+  let ok=0, fail=0;
+  for(const cd of toAdd){
+    try{ await insertCandidate(cd); ok++; }catch{ fail++; }
+  }
+  renderStats();
+  alert(`导入完成：成功 ${ok} 条${ fail?`，失败 ${fail} 条`:''}`);
 }
 
 function renderStats(){
