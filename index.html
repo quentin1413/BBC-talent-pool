@@ -700,10 +700,11 @@ async function parseResume(){
   "certificates": "证书、语言成绩（如雅思7分、四六级、计算机二级等），没有则空字符串",
   "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、项目、证书"
 }`;
-    const resp=await fetch('https://api.openai.com/v1/chat/completions',{
+    const resp=await fetch('/.netlify/functions/parse',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
+        apiKey,
         model:'gpt-4o-mini',
         max_tokens:1500,
         messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]
