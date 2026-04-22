@@ -105,6 +105,8 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 .lightbox img{max-width:90vw;max-height:90vh;border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
 .lightbox-close{position:fixed;top:18px;right:22px;font-size:28px;color:#fff;cursor:pointer;line-height:1;user-select:none}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 
 <div class="wrap">
 <h2 class="sr-only">AI 人才库 — 支持简历文件上传自动解析、岗位匹配</h2>
@@ -613,6 +615,22 @@ function handleFile(file){
   reader.readAsDataURL(file);
 }
 
+// PDF 第一页渲染为 base64 JPEG
+async function pdfToBase64Image(base64Data){
+  const raw=atob(base64Data);
+  const bytes=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
+  const pdf=await pdfjsLib.getDocument({data:bytes}).promise;
+  const page=await pdf.getPage(1);
+  const scale=2;
+  const vp=page.getViewport({scale});
+  const canvas=document.createElement('canvas');
+  canvas.width=vp.width; canvas.height=vp.height;
+  await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+  const dataUrl=canvas.toDataURL('image/jpeg',0.9);
+  return dataUrl.split(',')[1];
+}
+
 async function parseResume(){
   const st=document.getElementById('parse-status');
   const ra=document.getElementById('parse-result-area');
@@ -626,12 +644,6 @@ async function parseResume(){
   const isImg=currentFileType.startsWith('image/');
   const isPdf=currentFileType==='application/pdf';
 
-  if(isPdf){
-    clearInterval(pint);
-    st.innerHTML='<div style="font-size:12px;color:#A32D2D;padding:6px 0">OpenAI 模式暂不支持 PDF 直接解析，请将 PDF 页面截图成 JPG/PNG 后上传。</div>';
-    return;
-  }
-
   const apiKey=getApiKey();
   if(!apiKey){
     clearInterval(pint);
@@ -639,12 +651,23 @@ async function parseResume(){
     return;
   }
 
-  const contentBlock = {
-    type:'image_url',
-    image_url:{url:`data:${currentFileType};base64,${currentFileData}`}
-  };
-
-  const prompt=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。注意：projects 必须逐条列出简历中所有项目经历，一个也不要省略。
+  try {
+    let contentBlock;
+    if(isPdf){
+      // PDF.js 渲染第一页为图片
+      st.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:13px;color:var(--color-text-secondary)"><span>PDF 渲染中<span class="loading-dots"></span></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
+      const pdfImgBase64 = await pdfToBase64Image(currentFileData);
+      contentBlock = {
+        type:'image_url',
+        image_url:{url:`data:image/jpeg;base64,${pdfImgBase64}`}
+      };
+    } else {
+      contentBlock = {
+        type:'image_url',
+        image_url:{url:`data:${currentFileType};base64,${currentFileData}`}
+      };
+    }
+    const prompt=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。注意：projects 必须逐条列出简历中所有项目经历，一个也不要省略。
 {
   "name": "候选人姓名",
   "phone": "手机号，没有则空字符串",
@@ -676,8 +699,8 @@ async function parseResume(){
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
       body:JSON.stringify({
-        model:'gpt-4.1',
-        max_tokens:1000,
+        model:'gpt-4o-mini',
+        max_tokens:1500,
         messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]
       })
     });
