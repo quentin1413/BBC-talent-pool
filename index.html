@@ -193,55 +193,71 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 
 <!-- AI 解析简历 -->
 <div class="panel" id="p-upload">
-  <div class="notice">支持上传简历图片（JPG/PNG），由 AI 自动提取：姓名、联系方式、意向岗位、技能、<strong>教育背景、项目经历、证书</strong>及完整摘要，解析后可编辑再保存。每次解析一份简历。</div>
   <div class="field" style="margin-bottom:12px">
-    <label>OpenAI API Key <span style="color:#A32D2D">*</span> <span style="font-weight:400;color:var(--color-text-secondary)">（仅本地使用，不会上传到任何服务器）</span></label>
+    <label>OpenAI API Key <span style="color:#A32D2D">*</span> <span style="font-weight:400;color:var(--color-text-secondary)">（仅本地使用，不上传服务器）</span></label>
     <input id="api-key" type="password" placeholder="sk-proj-..." style="font-family:monospace" oninput="saveApiKey(this.value)">
   </div>
-
-  <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)">
-    <div class="upload-icon">📄</div>
-    <div style="font-size:14px;font-weight:500">点击上传或拖入简历文件</div>
-    <div class="upload-hint">支持 JPG / PNG / PDF，建议单页清晰图片效果最佳</div>
+  <div style="display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1rem">
+    <button class="tab active" style="padding:7px 16px" onclick="switchUploadMode('single',this)">单份解析</button>
+    <button class="tab" style="padding:7px 16px" onclick="switchUploadMode('batch',this)">⚡ 批量解析</button>
   </div>
-  <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="onFileSelect(event)">
 
-  <div id="file-preview-area"></div>
-  <div id="parse-status"></div>
-  <div id="parse-result-area"></div>
-
-  <!-- 解析后的编辑表单（隐藏直到解析完成） -->
-  <div id="parsed-form" style="display:none">
-    <div style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">确认并编辑信息</div>
-    <div class="grid2">
-      <div class="field"><label>姓名 *</label><input id="p-name"></div>
-      <div class="field"><label>联系方式</label><input id="p-contact"></div>
+  <!-- 单份解析 -->
+  <div id="upload-single">
+    <div class="notice">上传简历图片或 PDF，AI 提取信息后可编辑再保存。PDF 有文字层时识别更快。</div>
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)">
+      <div class="upload-icon">📄</div>
+      <div style="font-size:14px;font-weight:500">点击上传或拖入简历文件</div>
+      <div class="upload-hint">支持 JPG / PNG / PDF，PDF 有文字层时识别更快</div>
     </div>
-    <div class="grid2">
-      <div class="field"><label>最近任职岗位 *</label><input id="p-role"></div>
-      <div class="field"><label>性别</label>
-        <select id="p-gender"><option value="">不限</option><option>男</option><option>女</option></select>
+    <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="onFileSelect(event)">
+    <div id="file-preview-area"></div>
+    <div id="parse-status"></div>
+    <div id="parse-result-area"></div>
+    <div id="parsed-form" style="display:none">
+      <div style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">确认并编辑信息</div>
+      <div class="grid2">
+        <div class="field"><label>姓名 *</label><input id="p-name"></div>
+        <div class="field"><label>联系方式</label><input id="p-contact"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>最近任职岗位 *</label><input id="p-role"></div>
+        <div class="field"><label>性别</label>
+          <select id="p-gender"><option value="">不限</option><option>男</option><option>女</option></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>出生年份</label><input id="p-birthyear"></div>
+        <div class="field"><label>学历</label>
+          <select id="p-edulevel"><option value="">不限</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>专业</label><input id="p-major"></div>
+        <div class="field"><label>籍贯</label><input id="p-hometown"></div>
+      </div>
+      <div class="field"><label>工作履历（AI 提取，可编辑）</label><textarea id="p-workhist" style="height:120px"></textarea></div>
+      <div class="field"><label>状态</label>
+        <select id="p-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
+      </div>
+      <div class="field"><label>完整摘要（AI 生成，200字以内）</label><textarea id="p-note" style="height:80px"></textarea></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p" onclick="saveParsed()">✓ 保存至人才库</button>
+        <button class="btn btn-s" onclick="resetUpload()">重新上传</button>
       </div>
     </div>
-    <div class="grid2">
-      <div class="field"><label>出生年份</label><input id="p-birthyear"></div>
-      <div class="field"><label>学历</label>
-        <select id="p-edulevel"><option value="">不限</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option></select>
-      </div>
+  </div>
+
+  <!-- 批量解析 -->
+  <div id="upload-batch" style="display:none">
+    <div class="notice">选择多份简历（JPG/PNG/PDF），最多同时识别 3 份，全部自动保存至人才库，无需逐一确认。PDF 有文字层（非扫描件）时速度明显更快。</div>
+    <div class="upload-zone" id="batch-drop-zone" onclick="document.getElementById('batch-input').click()" ondragover="onBatchDrag(event,true)" ondragleave="onBatchDrag(event,false)" ondrop="onBatchDrop(event)">
+      <div class="upload-icon">📁</div>
+      <div style="font-size:14px;font-weight:500">点击选择或拖入多份简历</div>
+      <div class="upload-hint">可多选，支持 JPG / PNG / PDF</div>
     </div>
-    <div class="grid2">
-      <div class="field"><label>专业</label><input id="p-major"></div>
-      <div class="field"><label>籍贯</label><input id="p-hometown"></div>
-    </div>
-    <div class="field"><label>工作履历（AI 提取，可编辑）</label><textarea id="p-workhist" style="height:120px"></textarea></div>
-    <div class="field"><label>状态</label>
-      <select id="p-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
-    </div>
-    <div class="field"><label>完整摘要（AI 生成，200字以内）</label><textarea id="p-note" style="height:80px"></textarea></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-p" onclick="saveParsed()">✓ 保存至人才库</button>
-      <button class="btn btn-s" onclick="resetUpload()">重新上传</button>
-    </div>
+    <input type="file" id="batch-input" accept="image/*,.pdf" multiple style="display:none" onchange="startBatch(this.files)">
+    <div id="batch-list"></div>
   </div>
 </div>
 
@@ -564,42 +580,29 @@ function exportExcel(){
   if(!candidates.length){ alert('暂无候选人数据可导出'); return; }
   if(typeof XLSX==='undefined'){ alert('Excel 库尚未加载，请稍候再试'); return; }
 
-  const headers = [
-    '姓名','意向岗位','联系电话','邮箱',
-    '工作年限','期望薪资(K)','状态','来源',
-    '技能标签','教育背景','证书/语言',
-    '项目经历','备注','录入时间'
-  ];
+  const headers = ['序','姓名','联系方式','最近任职岗位','性别','出生年份','学历','专业','籍贯','工作履历'];
 
-  const rows = candidates.map(c => ({
+  const rows = candidates.map((c,idx) => ({
+    '序': idx+1,
     '姓名': c.name||'',
-    '意向岗位': c.role||'',
-    '联系电话': c.phone||'',
-    '邮箱': c.email||'',
-    '工作年限': c.exp||'',
-    '期望薪资(K)': c.salary||'',
-    '状态': c.status||'',
-    '来源': c.source||'',
-    '技能标签': (c.skills||[]).join('、'),
-    '教育背景': c.education||'',
-    '证书/语言': c.certificates||'',
-    '项目经历': (c.projects||[]).map(p=>p.name+(p.time?' ('+p.time+')\uff1a':'\uff1a')+(p.description||'')).join('\n'),
-    '备注': c.note||'',
-    '录入时间': c.addedAt ? c.addedAt.slice(0,10) : ''
+    '联系方式': c.contact||'',
+    '最近任职岗位': c.role||'',
+    '性别': c.gender||'',
+    '出生年份': c.birthYear||'',
+    '学历': c.eduLevel||'',
+    '专业': c.major||'',
+    '籍贯': c.hometown||'',
+    '工作履历': c.workHistory||''
   }));
 
   const ws = XLSX.utils.json_to_sheet(rows, {header: headers});
-
-  // 设列宽
   ws['!cols'] = [
-    {wch:10},{wch:18},{wch:14},{wch:22},
-    {wch:10},{wch:12},{wch:10},{wch:8},
-    {wch:30},{wch:24},{wch:16},
-    {wch:50},{wch:20},{wch:12}
+    {wch:5},{wch:10},{wch:18},{wch:22},
+    {wch:7},{wch:10},{wch:10},{wch:15},{wch:14},{wch:50}
   ];
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '候选人库');
+  XLSX.utils.book_append_sheet(wb, ws, '人才库');
   const ts = new Date().toISOString().slice(0,10);
   XLSX.writeFile(wb, `人才库_${ts}.xlsx`);
 }
@@ -680,16 +683,24 @@ function clearForm(){
 // ===== AI 解析 =====
 let currentFileData=null, currentFileType=null, currentFile=null;
 
+function switchUploadMode(mode, btn){
+  document.getElementById('upload-single').style.display = mode==='single'?'':'none';
+  document.getElementById('upload-batch').style.display  = mode==='batch' ?'':'none';
+  const tabs = btn.parentElement.querySelectorAll('.tab');
+  tabs.forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 function onDrag(e,over){e.preventDefault();document.getElementById('drop-zone').classList.toggle('drag',over);}
-function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f) handleFile(f);}
-function onFileSelect(e){const f=e.target.files[0];if(f) handleFile(f);}
+function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+function onFileSelect(e){const f=e.target.files[0];if(f)handleFile(f);}
+function onBatchDrag(e,over){e.preventDefault();document.getElementById('batch-drop-zone').classList.toggle('drag',over);}
+function onBatchDrop(e){e.preventDefault();document.getElementById('batch-drop-zone').classList.remove('drag');if(e.dataTransfer.files.length)startBatch(e.dataTransfer.files);}
 
 function handleFile(file){
   const isImg=file.type.startsWith('image/');
   const isPdf=file.type==='application/pdf';
   if(!isImg&&!isPdf){alert('请上传图片（JPG/PNG）或 PDF 文件');return;}
-
-  // show preview
   const pa=document.getElementById('file-preview-area');
   const sizeStr=(file.size/1024).toFixed(0)+'KB';
   if(isImg){
@@ -698,7 +709,6 @@ function handleFile(file){
   } else {
     pa.innerHTML=`<div class="file-preview"><div class="file-thumb-pdf">PDF</div><div><div class="file-name">${file.name}</div><div class="file-size">${sizeStr}</div></div></div>`;
   }
-
   currentFile=file;
   const reader=new FileReader();
   reader.onload=function(ev){
@@ -709,7 +719,32 @@ function handleFile(file){
   reader.readAsDataURL(file);
 }
 
-// PDF 第一页渲染为 base64 JPEG
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=e=>resolve(e.target.result.split(',')[1]);
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function extractPdfText(base64Data){
+  if(typeof pdfjsLib==='undefined') return '';
+  try{
+    const raw=atob(base64Data);
+    const bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
+    const pdf=await pdfjsLib.getDocument({data:bytes}).promise;
+    let text='';
+    for(let p=1;p<=Math.min(pdf.numPages,5);p++){
+      const page=await pdf.getPage(p);
+      const ct=await page.getTextContent();
+      text+=ct.items.map(it=>it.str).join(' ')+'\n';
+    }
+    return text.trim();
+  }catch(e){return '';}
+}
+
 async function pdfToBase64Image(base64Data){
   const raw=atob(base64Data);
   const bytes=new Uint8Array(raw.length);
@@ -721,47 +756,10 @@ async function pdfToBase64Image(base64Data){
   const canvas=document.createElement('canvas');
   canvas.width=vp.width; canvas.height=vp.height;
   await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
-  const dataUrl=canvas.toDataURL('image/jpeg',0.9);
-  return dataUrl.split(',')[1];
+  return canvas.toDataURL('image/jpeg',0.9).split(',')[1];
 }
 
-async function parseResume(){
-  const st=document.getElementById('parse-status');
-  const ra=document.getElementById('parse-result-area');
-  document.getElementById('parsed-form').style.display='none';
-  ra.innerHTML='';
-  st.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:13px;color:var(--color-text-secondary)"><span>AI 正在识别简历<span class="loading-dots"></span></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
-
-  // animate progress
-  let pct=0; const pint=setInterval(()=>{pct=Math.min(pct+(Math.random()*8),85);document.getElementById('prog')&&(document.getElementById('prog').style.width=pct+'%');},300);
-
-  const isImg=currentFileType.startsWith('image/');
-  const isPdf=currentFileType==='application/pdf';
-
-  const apiKey=getApiKey();
-  if(!apiKey){
-    clearInterval(pint);
-    st.innerHTML='<div style="font-size:12px;color:#A32D2D;padding:6px 0">请先填写 OpenAI API Key</div>';
-    return;
-  }
-
-  try {
-    let contentBlock;
-    if(isPdf){
-      // PDF.js 渲染第一页为图片
-      st.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:13px;color:var(--color-text-secondary)"><span>PDF 渲染中<span class="loading-dots"></span></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
-      const pdfImgBase64 = await pdfToBase64Image(currentFileData);
-      contentBlock = {
-        type:'image_url',
-        image_url:{url:`data:image/jpeg;base64,${pdfImgBase64}`}
-      };
-    } else {
-      contentBlock = {
-        type:'image_url',
-        image_url:{url:`data:${currentFileType};base64,${currentFileData}`}
-      };
-    }
-    const prompt=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。
+const PARSE_PROMPT=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。
 {
   "name": "候选人姓名",
   "contact": "联系方式（电话/微信/邮箱，多个用空格分隔），没有则空字符串",
@@ -774,41 +772,153 @@ async function parseResume(){
   "work_history": "工作履历，按时间倒序列出每段经历：公司、职位、时间段、主要职责，直接复制简历原文",
   "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、工作经历"
 }`;
-    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
-    let resp;
-    if(isLocal){
-      // 本地直连 OpenAI（无跨域限制）
-      resp=await fetch('https://api.openai.com/v1/chat/completions',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-        body:JSON.stringify({model:'gpt-4o-mini',max_tokens:1500,messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]})
-      });
+
+async function callAI(userContent,apiKey){
+  const messages=[{role:'user',content:userContent}];
+  const isLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:';
+  let resp;
+  if(isLocal){
+    resp=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      body:JSON.stringify({model:'gpt-4o-mini',max_tokens:1500,messages})
+    });
+  } else {
+    resp=await fetch('/.netlify/functions/parse',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({apiKey,model:'gpt-4o-mini',max_tokens:1500,messages})
+    });
+  }
+  const data=await resp.json();
+  if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
+  let raw=data.choices?.[0]?.message?.content||'';
+  raw=raw.replace(/```json|```/g,'').trim();
+  return JSON.parse(raw);
+}
+
+async function parseResume(){
+  const st=document.getElementById('parse-status');
+  const ra=document.getElementById('parse-result-area');
+  document.getElementById('parsed-form').style.display='none';
+  ra.innerHTML='';
+  st.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:13px;color:var(--color-text-secondary)"><span>AI 正在识别简历<span class="loading-dots"></span></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
+  let pct=0;
+  const pint=setInterval(()=>{pct=Math.min(pct+(Math.random()*8),85);document.getElementById('prog')&&(document.getElementById('prog').style.width=pct+'%');},300);
+  const apiKey=getApiKey();
+  if(!apiKey){clearInterval(pint);st.innerHTML='<div style="font-size:12px;color:#A32D2D;padding:6px 0">请先填写 OpenAI API Key</div>';return;}
+  try{
+    let userContent;
+    if(currentFileType==='application/pdf'){
+      st.innerHTML=`<div style="padding:10px 0;font-size:13px;color:var(--color-text-secondary)">正在读取 PDF<span class="loading-dots"></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
+      const pdfText=await extractPdfText(currentFileData);
+      if(pdfText.length>300){
+        userContent=pdfText+'\n\n'+PARSE_PROMPT;
+      } else {
+        st.innerHTML=`<div style="padding:10px 0;font-size:13px;color:var(--color-text-secondary)">PDF 渲染为图片<span class="loading-dots"></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
+        const img=await pdfToBase64Image(currentFileData);
+        userContent=[{type:'image_url',image_url:{url:`data:image/jpeg;base64,${img}`}},{type:'text',text:PARSE_PROMPT}];
+      }
     } else {
-      // 线上通过 Netlify Function 中转（解决 CORS）
-      resp=await fetch('/.netlify/functions/parse',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({apiKey,model:'gpt-4o-mini',max_tokens:1500,messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]})
-      });
+      userContent=[{type:'image_url',image_url:{url:`data:${currentFileType};base64,${currentFileData}`}},{type:'text',text:PARSE_PROMPT}];
     }
+    st.innerHTML=`<div style="padding:10px 0;font-size:13px;color:var(--color-text-secondary)">AI 正在分析<span class="loading-dots"></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
+    const parsed=await callAI(userContent,apiKey);
     clearInterval(pint);
     if(document.getElementById('prog')) document.getElementById('prog').style.width='100%';
-
-    const data=await resp.json();
-    if(data.error){throw new Error(data.error.message);}
-
-    let raw=data.choices?.[0]?.message?.content||'';
-    raw=raw.replace(/```json|```/g,'').trim();
-    const parsed=JSON.parse(raw);
-
     st.innerHTML='<div style="font-size:12px;color:#0F6E56;padding:6px 0">✓ 解析完成，请确认以下信息</div>';
     showParsedForm(parsed);
-  } catch(err){
+  }catch(err){
     clearInterval(pint);
     st.innerHTML=`<div style="font-size:12px;color:#A32D2D;padding:6px 0">解析失败：${err.message}。请检查文件清晰度或手动录入。</div>`;
   }
 }
 
+// ===== 批量解析 =====
+let _batchCounter=0;
+
+async function startBatch(files){
+  const fileArr=[...files];
+  if(!fileArr.length) return;
+  const apiKey=getApiKey();
+  if(!apiKey){alert('请先填写 OpenAI API Key');return;}
+  document.getElementById('batch-input').value='';
+  const items=fileArr.map((f,i)=>({id:i,file:f,name:f.name,status:'pending',candidate:null,error:''}));
+  renderBatchList(items);
+  let idx=0;
+  async function worker(){
+    while(idx<items.length){
+      const item=items[idx++];
+      item.status='processing'; renderBatchList(items);
+      try{item.candidate=await parseAndSave(item.file,apiKey);item.status='done';}
+      catch(e){item.status='error';item.error=e.message;}
+      renderBatchList(items);
+    }
+  }
+  await Promise.all([worker(),worker(),worker()]);
+  const ok=items.filter(i=>i.status==='done').length;
+  const fail=items.filter(i=>i.status==='error').length;
+  document.getElementById('batch-list').insertAdjacentHTML('beforeend',
+    `<div style="margin-top:12px;padding:10px 12px;background:#E1F5EE;border-radius:var(--border-radius-md);font-size:13px;color:#085041">` +
+    `✓ 批量完成：已保存 <b>${ok}</b> 份${fail?`，失败 ${fail} 份`:''} — 可到「总览」查看</div>`);
+  renderStats();
+}
+
+async function parseAndSave(file,apiKey){
+  const isImg=file.type.startsWith('image/');
+  const isPdf=file.type==='application/pdf';
+  const b64=await fileToBase64(file);
+  let userContent;
+  if(isPdf){
+    const txt=await extractPdfText(b64);
+    if(txt.length>300){
+      userContent=txt+'\n\n'+PARSE_PROMPT;
+    } else {
+      const img=await pdfToBase64Image(b64);
+      userContent=[{type:'image_url',image_url:{url:`data:image/jpeg;base64,${img}`}},{type:'text',text:PARSE_PROMPT}];
+    }
+  } else {
+    userContent=[{type:'image_url',image_url:{url:`data:${file.type};base64,${b64}`}},{type:'text',text:PARSE_PROMPT}];
+  }
+  const p=await callAI(userContent,apiKey);
+  let resumeImgUrl=null;
+  if(isImg){try{resumeImgUrl=await uploadResumeImg(file);}catch(e){}}
+  const cd={
+    id:Date.now()*10000+(++_batchCounter),
+    name:p.name||file.name.replace(/\.[^.]+$/,''),
+    role:p.role||'',
+    contact:p.contact||p.phone||'',
+    gender:p.gender||'',
+    birthYear:p.birth_year||'',
+    eduLevel:p.edu_level||'',
+    major:p.major||'',
+    hometown:p.hometown||'',
+    workHistory:p.work_history||'',
+    status:'可联系',
+    resumeImg:resumeImgUrl,
+    addedAt:new Date().toISOString(),
+    source:'AI解析'
+  };
+  await insertCandidate(cd);
+  return cd;
+}
+
+function renderBatchList(items){
+  const done=items.filter(i=>i.status==='done').length;
+  const total=items.length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('batch-list').innerHTML=
+    `<div class="progress-bar" style="margin-bottom:10px"><div class="progress-fill" style="width:${pct}%"></div></div>`+
+    items.map(item=>{
+      const icon=item.status==='done'?'✓':item.status==='error'?'✗':item.status==='processing'?'⏳':'○';
+      const clr=item.status==='done'?'#0F6E56':item.status==='error'?'#A32D2D':item.status==='processing'?'#633806':'var(--color-text-secondary)';
+      const info=item.status==='done'?` → ${item.candidate?.name||''}`:item.status==='error'?` ${item.error.slice(0,40)}`:item.status==='processing'?' 识别中…':'';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:4px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)">` +
+        `<span style="color:${clr};font-size:13px;width:16px;flex-shrink:0">${icon}</span>` +
+        `<span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.name}</span>` +
+        `<span style="font-size:11px;color:${clr}">${info}</span></div>`;
+    }).join('');
+}
 const EDU_LEVELS=['高中及以下','大专','本科','硕士','博士'];
 
 function showParsedForm(p){
