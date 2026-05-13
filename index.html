@@ -172,15 +172,10 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
     </div>
   </div>
   <div class="grid2">
-    <div class="field"><label>出生年份</label><input id="f-birthyear" placeholder="如：1995"></div>
-    <div class="field"><label>学历</label>
-      <select id="f-edulevel"><option value="">不限</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option></select>
-    </div>
-  </div>
-  <div class="grid2">
-    <div class="field"><label>专业</label><input id="f-major" placeholder="如：市场营销、电子商务"></div>
+    <div class="field"><label>年龄</label><input id="f-age" placeholder="如：28"></div>
     <div class="field"><label>籍贯</label><input id="f-hometown" placeholder="如：广东广州"></div>
   </div>
+  <div class="field"><label>教育背景</label><input id="f-edubackground" placeholder="如：本科 市场营销"></div>
   <div class="field"><label>工作履历</label><textarea id="f-workhist" placeholder="请简要描述候选人工作经历，如：2021-2023 某公司 Amazon运营，负责..." style="height:100px"></textarea></div>
   <div class="field"><label>状态</label>
     <select id="f-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
@@ -227,15 +222,10 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
         </div>
       </div>
       <div class="grid2">
-        <div class="field"><label>出生年份</label><input id="p-birthyear"></div>
-        <div class="field"><label>学历</label>
-          <select id="p-edulevel"><option value="">不限</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option></select>
-        </div>
-      </div>
-      <div class="grid2">
-        <div class="field"><label>专业</label><input id="p-major"></div>
+        <div class="field"><label>年龄</label><input id="p-age"></div>
         <div class="field"><label>籍贯</label><input id="p-hometown"></div>
       </div>
+      <div class="field"><label>教育背景</label><input id="p-edubackground"></div>
       <div class="field"><label>工作履历（AI 提取，可编辑）</label><textarea id="p-workhist" style="height:120px"></textarea></div>
       <div class="field"><label>状态</label>
         <select id="p-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
@@ -334,25 +324,28 @@ function saveRoles(arr){ localStorage.setItem(SK_ROLES, JSON.stringify(arr)); }
 function packEdu(cd){
   return [
     '性别:'+(cd.gender||''),
-    '出生年份:'+(cd.birthYear||''),
-    '学历:'+(cd.eduLevel||''),
-    '专业:'+(cd.major||''),
+    '年龄:'+(cd.age||''),
+    '教育背景:'+(cd.eduBackground||''),
     '籍贯:'+(cd.hometown||'')
   ].join(' | ');
 }
 function unpackEdu(str){
-  const res={gender:'',birthYear:'',eduLevel:'',major:'',hometown:''};
+  const res={gender:'',age:'',eduBackground:'',hometown:''};
   if(!str) return res;
+  let _edu='',_major='';
   str.split('|').forEach(part=>{
     const idx=part.indexOf(':');
     if(idx<0) return;
     const k=part.slice(0,idx).trim(), v=part.slice(idx+1).trim();
-    if(k==='性别')    res.gender=v;
-    else if(k==='出生年份') res.birthYear=v;
-    else if(k==='学历')    res.eduLevel=v;
-    else if(k==='专业')    res.major=v;
+    if(k==='性别')         res.gender=v;
+    else if(k==='年龄')    res.age=v;
+    else if(k==='出生年份') res.age=v;
+    else if(k==='教育背景') res.eduBackground=v;
+    else if(k==='学历')    _edu=v;
+    else if(k==='专业')    _major=v;
     else if(k==='籍贯')    res.hometown=v;
   });
+  if(!res.eduBackground) res.eduBackground=[_edu,_major].filter(Boolean).join(' ');
   return res;
 }
 
@@ -477,9 +470,8 @@ function dbToLocal(row){
     role: row.role,
     contact: row.phone,
     gender: edu.gender,
-    birthYear: edu.birthYear,
-    eduLevel: edu.eduLevel,
-    major: edu.major,
+    age: edu.age,
+    eduBackground: edu.eduBackground,
     hometown: edu.hometown,
     workHistory: wh,
     status: row.status,
@@ -551,9 +543,8 @@ function cCard(cd,idx,score){
   const thumb=cd.resumeImg?`<img class="resume-thumb" src="${cd.resumeImg}" title="点击查看简历原图" onclick="event.stopPropagation();openLightbox('${cd.resumeImg}')">`:'';
   const metaParts=[];
   if(cd.gender) metaParts.push(cd.gender);
-  if(cd.birthYear) metaParts.push(cd.birthYear+'年');
-  if(cd.eduLevel) metaParts.push(cd.eduLevel);
-  if(cd.major) metaParts.push(cd.major);
+  if(cd.age) metaParts.push(cd.age+'岁');
+  if(cd.eduBackground) metaParts.push(cd.eduBackground);
   if(cd.hometown) metaParts.push(cd.hometown);
   const meta=metaParts.length?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${metaParts.join(' · ')}</div>`:'';
   const contact=cd.contact?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">📞 ${cd.contact}</div>`:'';
@@ -574,9 +565,8 @@ function downloadTemplate(e){
       "role": "Amazon运营专员",
       "contact": "138xxxx1234",
       "gender": "男",
-      "birthYear": "1995",
-      "eduLevel": "本科",
-      "major": "市场营销",
+      "age": "30",
+      "eduBackground": "本科 市场营销",
       "hometown": "广东广州",
       "workHistory": "2021-2023 某跨境公司 Amazon运营专员，负责店铺Listing优化与广告投放。",
       "status": "可联系",
@@ -597,7 +587,7 @@ function exportExcel(){
   if(!candidates.length){ alert('暂无候选人数据可导出'); return; }
   if(typeof XLSX==='undefined'){ alert('Excel 库尚未加载，请稍候再试'); return; }
 
-  const headers = ['序','姓名','联系方式','最近任职岗位','性别','出生年份','学历','专业','籍贯','工作履历'];
+  const headers = ['序','姓名','联系方式','最近任职岗位','性别','年龄','教育背景','籍贯','工作履历'];
 
   const rows = candidates.map((c,idx) => ({
     '序': idx+1,
@@ -605,9 +595,8 @@ function exportExcel(){
     '联系方式': c.contact||'',
     '最近任职岗位': c.role||'',
     '性别': c.gender||'',
-    '出生年份': c.birthYear||'',
-    '学历': c.eduLevel||'',
-    '专业': c.major||'',
+    '年龄': c.age||'',
+    '教育背景': c.eduBackground||'',
     '籍贯': c.hometown||'',
     '工作履历': c.workHistory||''
   }));
@@ -615,7 +604,7 @@ function exportExcel(){
   const ws = XLSX.utils.json_to_sheet(rows, {header: headers});
   ws['!cols'] = [
     {wch:5},{wch:10},{wch:18},{wch:22},
-    {wch:7},{wch:10},{wch:10},{wch:15},{wch:14},{wch:50}
+    {wch:7},{wch:8},{wch:22},{wch:14},{wch:50}
   ];
 
   const wb = XLSX.utils.book_new();
@@ -678,9 +667,8 @@ async function saveCandidate(){
     id:Date.now(),name,role,
     contact:document.getElementById('f-contact').value.trim(),
     gender:document.getElementById('f-gender').value,
-    birthYear:document.getElementById('f-birthyear').value.trim(),
-    eduLevel:document.getElementById('f-edulevel').value,
-    major:document.getElementById('f-major').value.trim(),
+    age:document.getElementById('f-age').value.trim(),
+    eduBackground:document.getElementById('f-edubackground').value.trim(),
     hometown:document.getElementById('f-hometown').value.trim(),
     workHistory:document.getElementById('f-workhist').value.trim(),
     status:document.getElementById('f-status').value,
@@ -692,9 +680,8 @@ async function saveCandidate(){
   }catch(e){alert('保存失败：'+e.message);}
 }
 function clearForm(){
-  ['f-name','f-contact','f-role','f-birthyear','f-major','f-hometown','f-workhist'].forEach(id=>document.getElementById(id).value='');
+  ['f-name','f-contact','f-role','f-age','f-edubackground','f-hometown','f-workhist'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-gender').value='';
-  document.getElementById('f-edulevel').value='';
 }
 
 // ===== AI 解析 =====
@@ -782,9 +769,8 @@ const PARSE_PROMPT=`你是一个简历信息提取助手。请从这份简历中
   "contact": "联系方式（电话/微信/邮箱，多个用空格分隔），没有则空字符串",
   "role": "最近任职岗位，若简历未注明则根据经历合理推断",
   "gender": "性别，只填：男 或 女，不确定则空字符串",
-  "birth_year": "出生年份，如 1995，没有则空字符串",
-  "edu_level": "最高学历，从以下选项中选：高中及以下/大专/本科/硕士/博士，没有则空字符串",
-  "major": "所学专业，没有则空字符串",
+  "age": "年龄，如：28，没有则根据出生年份推算，实在没有则空字符串",
+  "edu_background": "教育背景，直接写学历和专业，如：本科 市场营销，没有则空字符串",
   "hometown": "籍贯，没有则空字符串",
   "work_history": "工作履历，按时间倒序列出每段经历：公司、职位、时间段、主要职责，直接复制简历原文",
   "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、工作经历"
@@ -906,9 +892,8 @@ async function parseAndSave(file,apiKey){
     role:p.role||'',
     contact:p.contact||p.phone||'',
     gender:p.gender||'',
-    birthYear:p.birth_year||'',
-    eduLevel:p.edu_level||'',
-    major:p.major||'',
+    age:p.age||'',
+    eduBackground:p.edu_background||'',
     hometown:p.hometown||'',
     workHistory:p.work_history||'',
     status:'可联系',
@@ -936,18 +921,14 @@ function renderBatchList(items){
         `<span style="font-size:11px;color:${clr}">${info}</span></div>`;
     }).join('');
 }
-const EDU_LEVELS=['高中及以下','大专','本科','硕士','博士'];
-
 function showParsedForm(p){
   document.getElementById('p-name').value=p.name||'';
   document.getElementById('p-contact').value=p.contact||p.phone||'';
   document.getElementById('p-role').value=p.role||'';
   const pg=document.getElementById('p-gender');
   pg.value=['男','女'].includes(p.gender)?p.gender:'';
-  document.getElementById('p-birthyear').value=p.birth_year||'';
-  const pe=document.getElementById('p-edulevel');
-  pe.value=EDU_LEVELS.includes(p.edu_level)?p.edu_level:'';
-  document.getElementById('p-major').value=p.major||'';
+  document.getElementById('p-age').value=p.age||'';
+  document.getElementById('p-edubackground').value=p.edu_background||'';
   document.getElementById('p-hometown').value=p.hometown||'';
   document.getElementById('p-workhist').value=p.work_history||'';
   document.getElementById('p-note').value=p.summary||'';
@@ -969,9 +950,8 @@ async function saveParsed(){
       id:Date.now(),name,role,
       contact:document.getElementById('p-contact').value.trim(),
       gender:document.getElementById('p-gender').value,
-      birthYear:document.getElementById('p-birthyear').value.trim(),
-      eduLevel:document.getElementById('p-edulevel').value,
-      major:document.getElementById('p-major').value.trim(),
+      age:document.getElementById('p-age').value.trim(),
+      eduBackground:document.getElementById('p-edubackground').value.trim(),
       hometown:document.getElementById('p-hometown').value.trim(),
       workHistory:document.getElementById('p-workhist').value.trim(),
       status:document.getElementById('p-status').value,
@@ -991,9 +971,8 @@ function resetUpload(){
   document.getElementById('parse-result-area').innerHTML='';
   document.getElementById('parsed-form').style.display='none';
   document.getElementById('file-input').value='';
-  ['p-name','p-contact','p-role','p-birthyear','p-major','p-hometown','p-workhist','p-note'].forEach(id=>document.getElementById(id).value='');
+  ['p-name','p-contact','p-role','p-age','p-edubackground','p-hometown','p-workhist','p-note'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('p-gender').value='';
-  document.getElementById('p-edulevel').value='';
   currentFileData=null; currentFile=null;
 }
 
@@ -1003,7 +982,7 @@ function doSearch(){
   const st=document.getElementById('f-filter').value;
   const ql=q.toLowerCase();
   let res=candidates.filter(c=>{
-    const mq=!ql||[c.name,c.role,c.contact,c.gender,c.eduLevel,c.major,c.hometown,c.workHistory].join(' ').toLowerCase().includes(ql);
+    const mq=!ql||[c.name,c.role,c.contact,c.gender,c.age,c.eduBackground,c.hometown,c.workHistory].join(' ').toLowerCase().includes(ql);
     const ms=!st||c.status===st;
     return mq&&ms;
   });
@@ -1021,7 +1000,7 @@ function doMatch(){
     if(c.role.includes(role)||role.includes(c.role.split(/[、，,\s]/)[0])) sc+=40;
     else if([...role].some(ch=>c.role.includes(ch))) sc+=15;
     if(kw){
-      const haystack=[c.workHistory,c.role,c.major,c.eduLevel].join(' ').toLowerCase();
+      const haystack=[c.workHistory,c.role,c.eduBackground].join(' ').toLowerCase();
       if(haystack.includes(kw)) sc+=35;
     } else {
       sc+=20;
