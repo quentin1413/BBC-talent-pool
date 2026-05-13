@@ -163,26 +163,28 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 <div class="panel" id="p-add">
   <div class="grid2">
     <div class="field"><label>姓名 *</label><input id="f-name" placeholder="张三"></div>
-    <div class="field"><label>联系电话</label><input id="f-phone" placeholder="138xxxx1234"></div>
+    <div class="field"><label>联系方式</label><input id="f-contact" placeholder="电话 / 微信 / 邮箱"></div>
   </div>
   <div class="grid2">
-    <div class="field"><label>邮箱</label><input id="f-email" placeholder="zhangsan@email.com"></div>
-    <div class="field"><label>意向岗位 *</label><input id="f-role" placeholder="如：产品经理"></div>
-  </div>
-  <div class="grid2">
-    <div class="field"><label>工作年限</label>
-      <select id="f-exp"><option>应届</option><option>1-3年</option><option>3-5年</option><option>5-10年</option><option>10年+</option></select>
+    <div class="field"><label>最近任职岗位 *</label><input id="f-role" placeholder="如：Amazon运营专员"></div>
+    <div class="field"><label>性别</label>
+      <select id="f-gender"><option value="">不限</option><option>男</option><option>女</option></select>
     </div>
-    <div class="field"><label>期望薪资（K）</label><input id="f-salary" placeholder="15-20"></div>
   </div>
-  <div class="field"><label>技能标签</label>
-    <div class="tag-row" id="add-tags"></div>
-    <input placeholder="自定义技能，回车添加" onkeydown="addCustom(event,'add-tags')" style="margin-top:7px">
+  <div class="grid2">
+    <div class="field"><label>出生年份</label><input id="f-birthyear" placeholder="如：1995"></div>
+    <div class="field"><label>学历</label>
+      <select id="f-edulevel"><option value="">不限</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option></select>
+    </div>
   </div>
+  <div class="grid2">
+    <div class="field"><label>专业</label><input id="f-major" placeholder="如：市场营销、电子商务"></div>
+    <div class="field"><label>籍贯</label><input id="f-hometown" placeholder="如：广东广州"></div>
+  </div>
+  <div class="field"><label>工作履历</label><textarea id="f-workhist" placeholder="请简要描述候选人工作经历，如：2021-2023 某公司 Amazon运营，负责..." style="height:100px"></textarea></div>
   <div class="field"><label>状态</label>
     <select id="f-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
   </div>
-  <div class="field"><label>备注</label><textarea id="f-note" placeholder="面试印象、优缺点、特别说明..."></textarea></div>
   <div style="display:flex;gap:8px">
     <button class="btn btn-p" onclick="saveCandidate()">保存候选人</button>
     <button class="btn btn-s" onclick="clearForm()">清空</button>
@@ -213,30 +215,28 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
     <div style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">确认并编辑信息</div>
     <div class="grid2">
       <div class="field"><label>姓名 *</label><input id="p-name"></div>
-      <div class="field"><label>联系电话</label><input id="p-phone"></div>
+      <div class="field"><label>联系方式</label><input id="p-contact"></div>
     </div>
     <div class="grid2">
-      <div class="field"><label>邮箱</label><input id="p-email"></div>
-      <div class="field"><label>意向岗位 *</label><input id="p-role"></div>
-    </div>
-    <div class="grid2">
-      <div class="field"><label>工作年限</label>
-        <select id="p-exp"><option>应届</option><option>1-3年</option><option>3-5年</option><option>5-10年</option><option>10年+</option></select>
+      <div class="field"><label>最近任职岗位 *</label><input id="p-role"></div>
+      <div class="field"><label>性别</label>
+        <select id="p-gender"><option value="">不限</option><option>男</option><option>女</option></select>
       </div>
-      <div class="field"><label>期望薪资（K）</label><input id="p-salary"></div>
     </div>
-    <div class="field"><label>技能标签（AI 已预选，可调整）</label>
-      <div class="tag-row" id="parsed-tags"></div>
-      <input placeholder="自定义技能，回车添加" onkeydown="addCustom(event,'parsed-tags')" style="margin-top:7px">
+    <div class="grid2">
+      <div class="field"><label>出生年份</label><input id="p-birthyear"></div>
+      <div class="field"><label>学历</label>
+        <select id="p-edulevel"><option value="">不限</option><option>高中及以下</option><option>大专</option><option>本科</option><option>硕士</option><option>博士</option></select>
+      </div>
     </div>
+    <div class="grid2">
+      <div class="field"><label>专业</label><input id="p-major"></div>
+      <div class="field"><label>籍贯</label><input id="p-hometown"></div>
+    </div>
+    <div class="field"><label>工作履历（AI 提取，可编辑）</label><textarea id="p-workhist" style="height:120px"></textarea></div>
     <div class="field"><label>状态</label>
       <select id="p-status"><option>可联系</option><option>在职观望</option><option>已入职他司</option><option>暂不考虑</option></select>
     </div>
-    <div class="field"><label>教育背景（AI 提取）</label><textarea id="p-education" style="height:56px"></textarea></div>
-    <div class="field"><label>项目 / 实习经历（AI 逐条提取，可编辑）</label>
-      <div id="p-projects-list" class="proj-list"></div>
-    </div>
-    <div class="field"><label>证书 / 语言成绩（AI 提取）</label><input id="p-certificates"></div>
     <div class="field"><label>完整摘要（AI 生成，200字以内）</label><textarea id="p-note" style="height:80px"></textarea></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-p" onclick="saveParsed()">✓ 保存至人才库</button>
@@ -258,15 +258,10 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 
 <!-- 匹配 -->
 <div class="panel" id="p-match">
-  <div class="notice">填写新岗位需求，系统自动从人才库匹配最合适的候选人（规则打分 + 技能语义权重）</div>
+  <div class="notice">填写岗位名称，系统自动从人才库匹配最合适的候选人（岗位相似度 + 工作履历关键词权重）</div>
   <div class="grid2">
-    <div class="field"><label>岗位名称 *</label><input id="m-role" placeholder="如：高级前端工程师"></div>
-    <div class="field"><label>要求年限</label>
-      <select id="m-exp"><option value="">不限</option><option>应届</option><option>1-3年</option><option>3-5年</option><option>5-10年</option><option>10年+</option></select>
-    </div>
-  </div>
-  <div class="field"><label>必要技能</label>
-    <div class="tag-row" id="m-tags"></div>
+    <div class="field"><label>岗位名称 *</label><input id="m-role" placeholder="如：Amazon运营专员"></div>
+    <div class="field"><label>关键词筛选</label><input id="m-keyword" placeholder="如：英语 Shopify 跨境 3年"></div>
   </div>
   <button class="btn btn-p" onclick="doMatch()" style="margin-bottom:1.25rem">开始匹配</button>
   <div id="match-list"></div>
@@ -274,7 +269,7 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
 
 <!-- 设置 -->
 <div class="panel" id="p-settings">
-  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px">点击岗位标签可自动跳转至「岗位匹配」并填入名称；点击技能标签可跳转至「手动录入」并选中该技能。点 × 可删除选项。</div>
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px">点击岗位标签可自动跳转至「岗位匹配」并填入名称。点 × 可删除选项。</div>
 
   <div class="settings-section">
     <div class="settings-title">🏷 岗位选项</div>
@@ -283,16 +278,6 @@ body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
       <input id="st-role-input" placeholder="新岗位名称，回车添加" onkeydown="addSettingItem(event,'role')" style="flex:1">
       <button class="btn btn-s" style="white-space:nowrap" onclick="resetDefault('role')">恢复预设</button>
-    </div>
-  </div>
-
-  <div class="settings-section">
-    <div class="settings-title">🏠 技能选项</div>
-    <div class="settings-desc">若删除预设技能后可点「恢复预设」重置</div>
-    <div class="settings-tags" id="st-skills"></div>
-    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-      <input id="st-skill-input" placeholder="新技能名称，回车添加" onkeydown="addSettingItem(event,'skill')" style="flex:1">
-      <button class="btn btn-s" style="white-space:nowrap" onclick="resetDefault('skill')">恢复预设</button>
     </div>
   </div>
 </div>
@@ -312,124 +297,81 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const SB_HDR  = { 'Content-Type':'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer '+SB_ANON };
 
 const APIKEY_KEY = 'tp_openai_key';
-const SK_SKILLS = 'tp_custom_skills';
-const SK_ROLES  = 'tp_custom_roles';
-
-// ===== 预设常量 =====
-const DEFAULT_SKILLS = [
-  // 通用
-  'Java','Python','JavaScript','React','Vue',
-  'SQL','数据分析','项目管理','UI/UX','人力资源','财务','法务',
-  // 跨境电商
-  'Amazon运营','eBay运营','Shopee运营','Lazada运营','Temu运营','TikTok Shop',
-  'Shopify建站','WordPress','WooCommerce',
-  'Google Ads','Facebook Ads','Meta广告','Google SEO','Listing优化',
-  'A+页面设计','ERP系统','飞书','SkyWard','Sellics',
-  '品牌营销','社媒运营','红人合作','内容营销','电商运营',
-  '供应链管理','国际物流','客户服务','央样管理','选品分析',
-  '数据分析','经营分析','Power BI','Excel数据','Tableau',
-  '英语读写','日语','韩语','法语','平面设计','视频剪辑','PS/AI',
-  '销售','客服','运营策划','新媒体','市场营销','产品设计','用户研究'
-];
+const SK_ROLES   = 'tp_custom_roles';
 
 const DEFAULT_ROLES = [
-  // 跨境电商岗位
   'Amazon运营专员','Amazon运营主管','eBay运营专员','Shopee运营专员',
   'Lazada运营专员','Temu运营专员','TikTok运营专员',
   '多平台电商运营','跨境电商运营','电商运营主管',
-  '展示设计师','Listing优化专员','站外广告专员',
-  'Google SEO专员','内容营销','社媒运营专员',
-  '供应链专员','采购专员','物流专员','仓储管理',
-  '客服专员','天猫客服','电商客服主管',
-  '数据分析师','选品分析师','运营数据分析',
-  '电商产品经理','品牌运营主管','红人商务',
-  // 通用岗位
-  '产品经理','项目经理','市场营销','市场专员',
-  '销售主管','销售专员','财务专员','人力资源',
-  '前端开发','后端开发','全栈开发','设计师','数据分析师'
+  'Listing优化专员','站外广告专员','Google SEO专员',
+  '内容营销','社媒运营专员','供应链专员','采购专员',
+  '物流专员','仓储管理','客服专员','电商客服主管',
+  '数据分析师','选品分析师','运营数据分析','电商产品经理',
+  '品牌运营主管','红人商务','产品经理','项目经理',
+  '市场专员','销售主管','销售专员','财务专员','人力资源'
 ];
 
-// 读写用户自定义列表
-function getSkills(){ return JSON.parse(localStorage.getItem(SK_SKILLS)||'null') || DEFAULT_SKILLS.slice(); }
-function getRoles(){  return JSON.parse(localStorage.getItem(SK_ROLES) ||'null') || DEFAULT_ROLES.slice(); }
-function saveSkills(arr){ localStorage.setItem(SK_SKILLS, JSON.stringify(arr)); }
-function saveRoles(arr){  localStorage.setItem(SK_ROLES,  JSON.stringify(arr)); }
+function getRoles(){ return JSON.parse(localStorage.getItem(SK_ROLES)||'null') || DEFAULT_ROLES.slice(); }
+function saveRoles(arr){ localStorage.setItem(SK_ROLES, JSON.stringify(arr)); }
 
-// 渲染技能标签到指定容器
-function renderTagsTo(containerId, selecteds=[], editable=true){
-  const box = document.getElementById(containerId);
-  if(!box) return;
-  const skills = getSkills();
-  box.innerHTML = skills.map(sk => {
-    const on = selecteds.some(s=>s===sk||s.includes(sk)||sk.includes(s)) ? ' on' : '';
-    return `<span class="tag${on}" onclick="tt(this)">${sk}</span>`;
-  }).join('');
+// 把 5 个新字段压缩存入 education 列（管道分隔，便于目视）
+function packEdu(cd){
+  return [
+    '性别:'+(cd.gender||''),
+    '出生年份:'+(cd.birthYear||''),
+    '学历:'+(cd.eduLevel||''),
+    '专业:'+(cd.major||''),
+    '籍贯:'+(cd.hometown||'')
+  ].join(' | ');
+}
+function unpackEdu(str){
+  const res={gender:'',birthYear:'',eduLevel:'',major:'',hometown:''};
+  if(!str) return res;
+  str.split('|').forEach(part=>{
+    const idx=part.indexOf(':');
+    if(idx<0) return;
+    const k=part.slice(0,idx).trim(), v=part.slice(idx+1).trim();
+    if(k==='性别')    res.gender=v;
+    else if(k==='出生年份') res.birthYear=v;
+    else if(k==='学历')    res.eduLevel=v;
+    else if(k==='专业')    res.major=v;
+    else if(k==='籍贯')    res.hometown=v;
+  });
+  return res;
 }
 
-// 渲染设置面板标签
+// 渲染设置面板岗位标签
 function renderSettingsTags(){
-  const skills = getSkills();
-  const roles  = getRoles();
-  document.getElementById('st-skills').innerHTML = skills.map((s,i)=>
-    `<span class="st-tag" title="点击跳转到手动录入并选中该技能" onclick="quickFillSkill('${s.replace(/'/g,"\\'")}')">&#128196; ${s}<span class="del" onclick="event.stopPropagation();delSettingItem('skill',${i})">&times;</span></span>`
-  ).join('');
-  document.getElementById('st-roles').innerHTML  = roles.map((r,i)=>
-    `<span class="st-tag" title="点击跳转到岗位匹配并自动填入" onclick="quickFillRole('${r.replace(/'/g,"\\'")}')">&#128269; ${r}<span class="del" onclick="event.stopPropagation();delSettingItem('role',${i})">&times;</span></span>`
+  const roles = getRoles();
+  document.getElementById('st-roles').innerHTML = roles.map((r,i)=>
+    `<span class="st-tag" title="点击跳转到岗位匹配并自动填入" onclick="quickFillRole('${r.replace(/'/g,"\\'")}')">&#128269; ${r}<span class="del" onclick="event.stopPropagation();delSettingItem(${i})">&times;</span></span>`
   ).join('');
 }
 
-// 快捷跳转：点击岗位标签 → 跳到岗位匹配 Tab 并填入
 function quickFillRole(role){
   sw('match');
   document.getElementById('m-role').value = role;
 }
 
-// 快捷跳转：点击技能标签 → 跳到手动录入 Tab 并选中该技能
-function quickFillSkill(skill){
-  sw('add');
-  const tag = [...document.querySelectorAll('#add-tags .tag')].find(t=>t.textContent===skill);
-  if(tag && !tag.classList.contains('on')) tag.classList.add('on');
-}
-
-function delSettingItem(type, idx){
-  if(type==='skill'){
-    const arr=getSkills(); arr.splice(idx,1); saveSkills(arr);
-  } else {
-    const arr=getRoles();  arr.splice(idx,1); saveRoles(arr);
-  }
+function delSettingItem(idx){
+  const arr=getRoles(); arr.splice(idx,1); saveRoles(arr);
   renderSettingsTags();
-  renderTagsTo('add-tags');
-  renderTagsTo('parsed-tags');
-  renderTagsTo('m-tags');
 }
 
 function addSettingItem(e, type){
   if(e.key!=='Enter') return;
-  const inputId = type==='skill' ? 'st-skill-input' : 'st-role-input';
-  const val = document.getElementById(inputId).value.trim();
+  const val = document.getElementById('st-role-input').value.trim();
   if(!val) return;
-  if(type==='skill'){
-    const arr=getSkills();
-    if(!arr.includes(val)){ arr.push(val); saveSkills(arr); }
-  } else {
-    const arr=getRoles();
-    if(!arr.includes(val)){ arr.push(val); saveRoles(arr); }
-  }
-  document.getElementById(inputId).value='';
+  const arr=getRoles();
+  if(!arr.includes(val)){ arr.push(val); saveRoles(arr); }
+  document.getElementById('st-role-input').value='';
   renderSettingsTags();
-  renderTagsTo('add-tags');
-  renderTagsTo('parsed-tags');
-  renderTagsTo('m-tags');
 }
 
 function resetDefault(type){
   if(!confirm('确定恢复预设？自定义添加的内容也会一并清除。')) return;
-  if(type==='skill') localStorage.removeItem(SK_SKILLS);
-  else               localStorage.removeItem(SK_ROLES);
+  localStorage.removeItem(SK_ROLES);
   renderSettingsTags();
-  renderTagsTo('add-tags');
-  renderTagsTo('parsed-tags');
-  renderTagsTo('m-tags');
 }
 
 let candidates = [];
@@ -472,22 +414,22 @@ async function uploadResumeImg(file){
   return `${SB_URL}/storage/v1/object/public/resumes/${path}`;
 }
 
-// 本地对象 → 数据库行
+// 本地对象 → 数据库行（新字段 packed 进 education，工作履历存 note）
 function localToDb(cd){
   return {
     id: cd.id,
     name: cd.name,
     role: cd.role,
-    phone: cd.phone||'',
-    email: cd.email||'',
-    exp: cd.exp||'',
-    salary: cd.salary||'',
+    phone: cd.contact||cd.phone||'',
+    email: '',
+    exp: '',
+    salary: '',
     status: cd.status||'可联系',
-    skills: cd.skills||[],
-    education: cd.education||'',
-    projects: cd.projects||[],
-    certificates: cd.certificates||'',
-    note: cd.note||'',
+    skills: [],
+    education: packEdu(cd),
+    projects: [],
+    certificates: '',
+    note: cd.workHistory||cd.note||'',
     resume_img: cd.resumeImg||null,
     added_at: cd.addedAt||new Date().toISOString(),
     source: cd.source||'手动'
@@ -495,20 +437,19 @@ function localToDb(cd){
 }
 // 数据库行 → 本地对象
 function dbToLocal(row){
+  const edu = unpackEdu(row.education);
   return {
     id: row.id,
     name: row.name,
     role: row.role,
-    phone: row.phone,
-    email: row.email,
-    exp: row.exp,
-    salary: row.salary,
+    contact: row.phone,
+    gender: edu.gender,
+    birthYear: edu.birthYear,
+    eduLevel: edu.eduLevel,
+    major: edu.major,
+    hometown: edu.hometown,
+    workHistory: row.note,
     status: row.status,
-    skills: row.skills||[],
-    education: row.education,
-    projects: row.projects||[],
-    certificates: row.certificates,
-    note: row.note,
     resumeImg: row.resume_img,
     addedAt: row.added_at,
     source: row.source
@@ -554,17 +495,6 @@ function sw(t){
   }
 }
 
-// tag toggle
-function tt(el){el.classList.toggle('on');}
-function addCustom(e,containerId){
-  if(e.key!=='Enter') return;
-  const v=e.target.value.trim(); if(!v) return;
-  const s=document.createElement('span'); s.className='tag on'; s.textContent=v; s.onclick=()=>tt(s);
-  document.getElementById(containerId).appendChild(s);
-  e.target.value='';
-}
-function getSelected(containerId){ return [...document.querySelectorAll('#'+containerId+' .tag.on')].map(t=>t.textContent); }
-
 // avatar colors
 const AC=[{bg:'#E6F1FB',c:'#0C447C'},{bg:'#E1F5EE',c:'#085041'},{bg:'#FAEEDA',c:'#633806'},{bg:'#EEEDFE',c:'#3C3489'},{bg:'#EAF3DE',c:'#27500A'},{bg:'#FAECE7',c:'#712B13'}];
 function avt(name,i){const a=AC[i%AC.length];return `<div class="avatar" style="background:${a.bg};color:${a.c}">${name.slice(0,2)}</div>`;}
@@ -584,23 +514,20 @@ function closeLightbox(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLightbox();});
 
 function cCard(cd,idx,score){
-  const sk=(cd.skills||[]).map(s=>`<span class="sk">${s}</span>`).join('');
   const sc=score!==undefined?`<div><div class="match-pct">${score}%</div><div class="match-lbl">匹配度</div></div>`:'';
-  const edu=cd.education?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px">🎓 ${cd.education}</div>`:'';
-  const cert=cd.certificates?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">🏅 ${cd.certificates}</div>`:'';
   const thumb=cd.resumeImg?`<img class="resume-thumb" src="${cd.resumeImg}" title="点击查看简历原图" onclick="event.stopPropagation();openLightbox('${cd.resumeImg}')">`:'';
-  const projs=Array.isArray(cd.projects)&&cd.projects.length
-    ?`<div class="c-projects"><div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:5px">📌 项目经历 (${cd.projects.length})</div>`
-      +cd.projects.map(p=>{
-        const t=(p.technologies||[]).join(' / ');
-        return `<div class="c-proj-item"><div class="c-proj-name">${p.name||''}${p.time?` <span style="font-weight:400;color:var(--color-text-secondary);font-size:10px">${p.time}</span>`:''}</div>${t?`<div class="c-proj-meta">${t}</div>`:''}${p.description?`<div style="font-size:11px;color:var(--color-text-primary);margin-top:3px;line-height:1.55">${p.description}</div>`:''}</div>`;
-      }).join('')+'</div>'
-    :'';
+  const metaParts=[];
+  if(cd.gender) metaParts.push(cd.gender);
+  if(cd.birthYear) metaParts.push(cd.birthYear+'年');
+  if(cd.eduLevel) metaParts.push(cd.eduLevel);
+  if(cd.major) metaParts.push(cd.major);
+  if(cd.hometown) metaParts.push(cd.hometown);
+  const meta=metaParts.length?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${metaParts.join(' · ')}</div>`:'';
+  const contact=cd.contact?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">📞 ${cd.contact}</div>`:'';
+  const wh=cd.workHistory?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;border-top:0.5px solid var(--color-border-tertiary);padding-top:6px;line-height:1.6">${cd.workHistory.slice(0,150)}${cd.workHistory.length>150?'...':''}</div>`:'';
   return `<div class="c-card${score>=70?' border-match':''}">
-    <div class="c-head">${avt(cd.name,idx)}<div style="flex:1"><div class="c-name">${cd.name} ${sBadge(cd.status)}</div><div class="c-sub">${cd.role} · ${cd.exp}${cd.salary?' · '+cd.salary+'K':''}</div></div>${thumb}${sc}</div>
-    ${sk?`<div class="skills">${sk}</div>`:''}
-    ${edu}${cert}${projs}
-    ${cd.note?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;border-top:0.5px solid var(--color-border-tertiary);padding-top:6px">${cd.note.slice(0,120)}${cd.note.length>120?'...':''}</div>`:''}
+    <div class="c-head">${avt(cd.name,idx)}<div style="flex:1"><div class="c-name">${cd.name} ${sBadge(cd.status)}</div><div class="c-sub">${cd.role}</div>${meta}</div>${thumb}${sc}</div>
+    ${contact}${wh}
   </div>`;
 }
 
@@ -612,23 +539,14 @@ function downloadTemplate(e){
       "id": 1700000000000,
       "name": "张三",
       "role": "Amazon运营专员",
-      "phone": "138xxxx1234",
-      "email": "zhangsan@example.com",
-      "exp": "1-3年",
-      "salary": "15-20",
+      "contact": "138xxxx1234",
+      "gender": "男",
+      "birthYear": "1995",
+      "eduLevel": "本科",
+      "major": "市场营销",
+      "hometown": "广东广州",
+      "workHistory": "2021-2023 某跨境公司 Amazon运营专员，负责店铺Listing优化与广告投放。",
       "status": "可联系",
-      "skills": ["Amazon运营", "Google Ads", "Excel数据"],
-      "education": "广州大学 | 市场营销 | 2019-2023",
-      "projects": [
-        {
-          "name": "跨境非标项目实习",
-          "time": "2022.06",
-          "technologies": ["Amazon后台", "Helium10"],
-          "description": "负责店铺 Listing 优化与广告投放，单月销售额提升 30%。"
-        }
-      ],
-      "certificates": "CET6: 530分",
-      "note": "避免尺寄他人",
       "resumeImg": "",
       "addedAt": "2024-01-01T00:00:00.000Z",
       "source": "手动"
@@ -735,14 +653,29 @@ function renderStats(){
 async function saveCandidate(){
   const name=document.getElementById('f-name').value.trim();
   const role=document.getElementById('f-role').value.trim();
-  if(!name||!role){alert('请填写姓名和意向岗位');return;}
-  const cd={id:Date.now(),name,role,phone:document.getElementById('f-phone').value.trim(),email:document.getElementById('f-email').value.trim(),exp:document.getElementById('f-exp').value,salary:document.getElementById('f-salary').value.trim(),status:document.getElementById('f-status').value,skills:getSelected('add-tags'),education:'',projects:[],certificates:'',note:document.getElementById('f-note').value.trim(),resumeImg:null,addedAt:new Date().toISOString(),source:'手动'};
+  if(!name||!role){alert('请填写姓名和最近任职岗位');return;}
+  const cd={
+    id:Date.now(),name,role,
+    contact:document.getElementById('f-contact').value.trim(),
+    gender:document.getElementById('f-gender').value,
+    birthYear:document.getElementById('f-birthyear').value.trim(),
+    eduLevel:document.getElementById('f-edulevel').value,
+    major:document.getElementById('f-major').value.trim(),
+    hometown:document.getElementById('f-hometown').value.trim(),
+    workHistory:document.getElementById('f-workhist').value.trim(),
+    status:document.getElementById('f-status').value,
+    resumeImg:null,addedAt:new Date().toISOString(),source:'手动'
+  };
   try{
     await insertCandidate(cd);
     clearForm(); sw('stats');
   }catch(e){alert('保存失败：'+e.message);}
 }
-function clearForm(){['f-name','f-phone','f-email','f-role','f-salary','f-note'].forEach(id=>document.getElementById(id).value='');document.querySelectorAll('#add-tags .tag.on').forEach(t=>t.classList.remove('on'));}
+function clearForm(){
+  ['f-name','f-contact','f-role','f-birthyear','f-major','f-hometown','f-workhist'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-gender').value='';
+  document.getElementById('f-edulevel').value='';
+}
 
 // ===== AI 解析 =====
 let currentFileData=null, currentFileType=null, currentFile=null;
@@ -828,31 +761,18 @@ async function parseResume(){
         image_url:{url:`data:${currentFileType};base64,${currentFileData}`}
       };
     }
-    const prompt=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。注意：projects 必须逐条列出简历中所有项目经历，一个也不要省略。
+    const prompt=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。
 {
   "name": "候选人姓名",
-  "phone": "手机号，没有则空字符串",
-  "email": "邮箱，没有则空字符串",
-  "role": "意向岗位，若简历未明硬写则根据技能和经历合理推断",
-  "exp": "工作年限，从这几个选项中选最接近的：应届/1-3年/3-5年/5-10年/10年+",
-  "salary": "期望薪资，只写数字范围如 15-20，没有则空字符串",
-  "skills": ["技能1","技能2"],
-  "education": {
-    "school": "学校名称",
-    "major": "专业",
-    "duration": "就读时间，如 2021.09-2025.06",
-    "honors": "奖学金、GPA、荣誉等，没有则空字符串"
-  },
-  "projects": [
-    {
-      "name": "项目名称",
-      "time": "时间，如 2024.03",
-      "technologies": ["技术1","技术2"],
-      "description": "详细职责与成果，直接复制简历原文描述，不要缩写"
-    }
-  ],
-  "certificates": "证书、语言成绩（如雅思7分、四六级、计算机二级等），没有则空字符串",
-  "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、项目、证书"
+  "contact": "联系方式（电话/微信/邮箱，多个用空格分隔），没有则空字符串",
+  "role": "最近任职岗位，若简历未注明则根据经历合理推断",
+  "gender": "性别，只填：男 或 女，不确定则空字符串",
+  "birth_year": "出生年份，如 1995，没有则空字符串",
+  "edu_level": "最高学历，从以下选项中选：高中及以下/大专/本科/硕士/博士，没有则空字符串",
+  "major": "所学专业，没有则空字符串",
+  "hometown": "籍贯，没有则空字符串",
+  "work_history": "工作履历，按时间倒序列出每段经历：公司、职位、时间段、主要职责，直接复制简历原文",
+  "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、工作经历"
 }`;
     const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
     let resp;
@@ -889,63 +809,21 @@ async function parseResume(){
   }
 }
 
-const EXP_OPTS=['应届','1-3年','3-5年','5-10年','10年+'];
-
-// 项目卡片渲染
-function renderProjCard(proj, idx, editable){
-  const techs=(proj.technologies||[]).map(t=>`<span>${t}</span>`).join('');
-  const bodyId=`pb-${Date.now()}-${idx}`;
-  return `<div class="proj-item">
-    <div class="proj-head" onclick="toggleProj(this)">
-      <span class="proj-title">${proj.name||'未命名项目'}</span>
-      <span class="proj-time">${proj.time||''}</span>
-      <span class="proj-toggle">▼</span>
-    </div>
-    <div class="proj-body open">
-      <div class="proj-tech">${techs}</div>
-      ${editable
-        ?`<textarea class="proj-desc" style="width:100%;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 8px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical;min-height:60px" data-proj-idx="${idx}">${proj.description||''}</textarea>`
-        :`<div class="proj-desc">${proj.description||''}</div>`
-      }
-    </div>
-  </div>`;
-}
-function toggleProj(head){
-  const body=head.nextElementSibling;
-  const tog=head.querySelector('.proj-toggle');
-  body.classList.toggle('open');
-  tog.style.transform=body.classList.contains('open')?'':'rotate(-90deg)';
-}
+const EDU_LEVELS=['高中及以下','大专','本科','硕士','博士'];
 
 function showParsedForm(p){
   document.getElementById('p-name').value=p.name||'';
-  document.getElementById('p-phone').value=p.phone||'';
-  document.getElementById('p-email').value=p.email||'';
+  document.getElementById('p-contact').value=p.contact||p.phone||'';
   document.getElementById('p-role').value=p.role||'';
-  const ei=EXP_OPTS.indexOf(p.exp); document.getElementById('p-exp').selectedIndex=ei>=0?ei:0;
-  document.getElementById('p-salary').value=p.salary||'';
-  // education
-  const edu=p.education||{};
-  const eduStr=typeof edu==='string'?edu:[edu.school,edu.major,edu.duration,edu.honors].filter(Boolean).join(' | ');
-  document.getElementById('p-education').value=eduStr;
-  // projects
-  const projs=Array.isArray(p.projects)?p.projects:[];
-  const pl=document.getElementById('p-projects-list');
-  pl.innerHTML=projs.length?projs.map((pr,i)=>renderProjCard(pr,i,true)).join(''):'<div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0">未提取到项目经历</div>';
-  document.getElementById('p-certificates').value=p.certificates||'';
+  const pg=document.getElementById('p-gender');
+  pg.value=['男','女'].includes(p.gender)?p.gender:'';
+  document.getElementById('p-birthyear').value=p.birth_year||'';
+  const pe=document.getElementById('p-edulevel');
+  pe.value=EDU_LEVELS.includes(p.edu_level)?p.edu_level:'';
+  document.getElementById('p-major').value=p.major||'';
+  document.getElementById('p-hometown').value=p.hometown||'';
+  document.getElementById('p-workhist').value=p.work_history||'';
   document.getElementById('p-note').value=p.summary||'';
-  // 先渲染全部预设标签，匹配的自动选中
-  renderTagsTo('parsed-tags', p.skills||[]);
-  // 添加预设中没有的额外技能
-  if(p.skills){
-    const preset=getSkills();
-    p.skills.forEach(sk=>{
-      if(!preset.some(pt=>pt.includes(sk)||sk.includes(pt))){
-        const s=document.createElement('span');s.className='tag on';s.textContent=sk;s.onclick=()=>tt(s);
-        document.getElementById('parsed-tags').appendChild(s);
-      }
-    });
-  }
   document.getElementById('parsed-form').style.display='block';
 }
 
@@ -956,21 +834,22 @@ async function saveParsed(){
   const btn=document.querySelector('#parsed-form .btn-p');
   btn.disabled=true; btn.textContent='保存中...';
   try{
-    // 上传简历图片到 Supabase Storage
     let resumeImgUrl=null;
     if(currentFile&&currentFile.type.startsWith('image/')){
       resumeImgUrl=await uploadResumeImg(currentFile);
     }
-    // 从卡片中读取编辑后的项目详情
-    const projItems=[...document.querySelectorAll('#p-projects-list .proj-item')];
-    const projects=projItems.map((item)=>{
-      const title=item.querySelector('.proj-title').textContent;
-      const time=item.querySelector('.proj-time').textContent;
-      const techs=[...item.querySelectorAll('.proj-tech span')].map(s=>s.textContent);
-      const ta=item.querySelector('textarea[data-proj-idx]');
-      return {name:title,time,technologies:techs,description:ta?ta.value:''};
-    });
-    const cd={id:Date.now(),name,role,phone:document.getElementById('p-phone').value.trim(),email:document.getElementById('p-email').value.trim(),exp:document.getElementById('p-exp').value,salary:document.getElementById('p-salary').value.trim(),status:document.getElementById('p-status').value,skills:getSelected('parsed-tags'),education:document.getElementById('p-education').value.trim(),projects,certificates:document.getElementById('p-certificates').value.trim(),note:document.getElementById('p-note').value.trim(),resumeImg:resumeImgUrl,addedAt:new Date().toISOString(),source:'AI解析'};
+    const cd={
+      id:Date.now(),name,role,
+      contact:document.getElementById('p-contact').value.trim(),
+      gender:document.getElementById('p-gender').value,
+      birthYear:document.getElementById('p-birthyear').value.trim(),
+      eduLevel:document.getElementById('p-edulevel').value,
+      major:document.getElementById('p-major').value.trim(),
+      hometown:document.getElementById('p-hometown').value.trim(),
+      workHistory:document.getElementById('p-workhist').value.trim(),
+      status:document.getElementById('p-status').value,
+      resumeImg:resumeImgUrl,addedAt:new Date().toISOString(),source:'AI解析'
+    };
     await insertCandidate(cd);
     resetUpload(); sw('stats');
   }catch(e){
@@ -985,9 +864,9 @@ function resetUpload(){
   document.getElementById('parse-result-area').innerHTML='';
   document.getElementById('parsed-form').style.display='none';
   document.getElementById('file-input').value='';
-  document.getElementById('p-education').value='';
-  document.getElementById('p-projects-list').innerHTML='';
-  document.getElementById('p-certificates').value='';
+  ['p-name','p-contact','p-role','p-birthyear','p-major','p-hometown','p-workhist','p-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-gender').value='';
+  document.getElementById('p-edulevel').value='';
   currentFileData=null; currentFile=null;
 }
 
@@ -997,8 +876,7 @@ function doSearch(){
   const st=document.getElementById('f-filter').value;
   const ql=q.toLowerCase();
   let res=candidates.filter(c=>{
-    const projText=(c.projects||[]).map(p=>[p.name,p.description,...(p.technologies||[])].join(' ')).join(' ');
-    const mq=!ql||[c.name,c.role,...(c.skills||[]),c.note,c.education,c.certificates,projText].join(' ').toLowerCase().includes(ql);
+    const mq=!ql||[c.name,c.role,c.contact,c.gender,c.eduLevel,c.major,c.hometown,c.workHistory].join(' ').toLowerCase().includes(ql);
     const ms=!st||c.status===st;
     return mq&&ms;
   });
@@ -1007,23 +885,23 @@ function doSearch(){
 document.querySelector('#p-search .search-row input') && document.querySelector('#p-search .search-row input').addEventListener('input',doSearch);
 
 // match
-const expO=['应届','1-3年','3-5年','5-10年','10年+'];
 function doMatch(){
   const role=document.getElementById('m-role').value.trim();
   if(!role){alert('请填写岗位名称');return;}
-  const reqSkills=getSelected('m-tags');
-  const reqExp=document.getElementById('m-exp').value;
+  const kw=(document.getElementById('m-keyword').value||'').trim().toLowerCase();
   const scored=candidates.map((c,i)=>{
     let sc=0;
-    if(c.role.includes(role)||role.includes(c.role.split(/[、，,\s]/)[0])) sc+=30;
-    else if([...role].some(ch=>c.role.includes(ch))) sc+=10;
-    if(reqSkills.length){const m=reqSkills.filter(s=>c.skills.includes(s)).length;sc+=Math.round(m/reqSkills.length*50);}
-    else sc+=20;
-    if(reqExp){const ci=expO.indexOf(c.exp),ri=expO.indexOf(reqExp);if(ci===ri)sc+=20;else if(ci>ri)sc+=10;}
-    else sc+=10;
-    if(c.status==='可联系') sc+=5;
+    if(c.role.includes(role)||role.includes(c.role.split(/[、，,\s]/)[0])) sc+=40;
+    else if([...role].some(ch=>c.role.includes(ch))) sc+=15;
+    if(kw){
+      const haystack=[c.workHistory,c.role,c.major,c.eduLevel].join(' ').toLowerCase();
+      if(haystack.includes(kw)) sc+=35;
+    } else {
+      sc+=20;
+    }
+    if(c.status==='可联系') sc+=10;
     return{c,i,sc:Math.min(100,sc)};
-  }).filter(x=>x.sc>15).sort((a,b)=>b.sc-a.sc);
+  }).filter(x=>x.sc>10).sort((a,b)=>b.sc-a.sc);
   const el=document.getElementById('match-list');
   el.innerHTML=scored.length?`<div style="font-size:13px;font-weight:500;margin-bottom:10px">为「${role}」找到 ${scored.length} 位候选人</div>`+scored.slice(0,10).map(({c,i,sc})=>cCard(c,i,sc)).join(''):'<div class="empty">人才库中暂无匹配候选人</div>';
 }
@@ -1033,9 +911,6 @@ function doMatch(){
   document.getElementById('recent-list').innerHTML='<div class="empty">正在连接数据库<span class="loading-dots"></span></div>';
   await migrateLocalStorage();
   await loadCandidates();
-  renderTagsTo('add-tags');
-  renderTagsTo('parsed-tags');
-  renderTagsTo('m-tags');
   renderStats();
 })();
 </script>
