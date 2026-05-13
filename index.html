@@ -469,8 +469,7 @@ function dbToLocal(row){
       });
     }
     if(row.certificates) parts.push('证书：' + row.certificates);
-    wh = parts.filter(Boolean).join('
-');
+    wh = parts.filter(Boolean).join('\n');
   }
   return {
     id: row.id,
