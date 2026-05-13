@@ -16,7 +16,7 @@ export const handler = async (event) => {
   }
 
   try {
-    const { apiKey, messages, model, max_tokens, max_completion_tokens } = JSON.parse(event.body || '{}');
+    const { apiKey, messages, model, max_tokens } = JSON.parse(event.body || '{}');
 
     if (!apiKey) {
       return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
@@ -31,7 +31,7 @@ export const handler = async (event) => {
       },
       body: JSON.stringify({
         model: model || 'gpt-4o-mini',
-        ...(max_completion_tokens ? { max_completion_tokens } : { max_tokens: max_tokens || 1500 }),
+        max_tokens: max_tokens || 1500,
         messages
       })
     });

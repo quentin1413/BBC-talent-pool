@@ -794,13 +794,13 @@ async function callAI(userContent,apiKey){
     resp=await fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify({model:'o1',max_completion_tokens:2000,messages})
+      body:JSON.stringify({model:'gpt-4o',max_tokens:2000,messages})
     });
   } else {
     resp=await fetch('/.netlify/functions/parse',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({apiKey,model:'o1',max_completion_tokens:2000,messages})
+      body:JSON.stringify({apiKey,model:'gpt-4o',max_tokens:2000,messages})
     });
   }
   const data=await resp.json();
