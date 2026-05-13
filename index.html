@@ -763,17 +763,27 @@ async function pdfToBase64Image(base64Data){
   return canvas.toDataURL('image/jpeg',0.9).split(',')[1];
 }
 
-const PARSE_PROMPT=`你是一个简历信息提取助手。请从这份简历中提取以下信息，只返回 JSON，不要任何其他文字。
+const PARSE_PROMPT=`你是一名专业HR，擅长解析51job、智联等平台导出的简历PDF（包括文字乱序的多栏布局）。请从下方内容中提取关键信息，**只返回合法JSON**，不要任何解释或代码块符号。
+
+提取规则（重要）：
+1. 姓名：简历开头最大/最突出的中文人名
+2. 联系方式：11位手机号、邮箱（含@）、微信号（标注"微信"后的字符串），多个用空格分隔
+3. 年龄：直接读取数字；若只有出生年份（如1995），用当前年份2025减去得到年龄
+4. 教育背景：最高学历（本科/大专/硕士等）+ 所学专业，如"本科 供应链管理"
+5. 籍贯：标注为"籍贯""户籍""户口所在地"后面的省市
+6. 最近任职岗位：工作经历中时间最靠近现在的职位名称
+7. 工作履历：按时间倒序，每段格式：时间段 | 公司 | 职位 换行 主要职责（可省略次要信息）
+
 {
   "name": "候选人姓名",
-  "contact": "联系方式（电话/微信/邮箱，多个用空格分隔），没有则空字符串",
+  "contact": "联系方式，多个用空格分隔，没有则空字符串",
   "role": "最近任职岗位，若简历未注明则根据经历合理推断",
   "gender": "性别，只填：男 或 女，不确定则空字符串",
-  "age": "年龄，如：28，没有则根据出生年份推算，实在没有则空字符串",
-  "edu_background": "教育背景，直接写学历和专业，如：本科 市场营销，没有则空字符串",
-  "hometown": "籍贯，没有则空字符串",
-  "work_history": "工作履历，按时间倒序列出每段经历：公司、职位、时间段、主要职责，直接复制简历原文",
-  "summary": "200字以内的候选人完整履历摘要，包含核心亮点、教育、工作经历"
+  "age": "年龄数字，如：28，不确定则空字符串",
+  "edu_background": "学历+专业，如：本科 供应链管理，没有则空字符串",
+  "hometown": "籍贯省市，没有则空字符串",
+  "work_history": "完整工作履历，每段经历用换行分隔",
+  "summary": "200字以内履历摘要，包含核心亮点、教育背景、工作年限"
 }`;
 
 async function callAI(userContent,apiKey){
@@ -784,13 +794,13 @@ async function callAI(userContent,apiKey){
     resp=await fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify({model:'gpt-4o-mini',max_tokens:1500,messages})
+      body:JSON.stringify({model:'gpt-4o',max_tokens:2000,messages})
     });
   } else {
     resp=await fetch('/.netlify/functions/parse',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({apiKey,model:'gpt-4o-mini',max_tokens:1500,messages})
+      body:JSON.stringify({apiKey,model:'gpt-4o',max_tokens:2000,messages})
     });
   }
   const data=await resp.json();
@@ -815,7 +825,7 @@ async function parseResume(){
     if(currentFileType==='application/pdf'){
       st.innerHTML=`<div style="padding:10px 0;font-size:13px;color:var(--color-text-secondary)">正在读取 PDF<span class="loading-dots"></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
       const pdfText=await extractPdfText(currentFileData);
-      if(pdfText.length>300){
+      if(pdfText.length>800){
         userContent=pdfText+'\n\n'+PARSE_PROMPT;
       } else {
         st.innerHTML=`<div style="padding:10px 0;font-size:13px;color:var(--color-text-secondary)">PDF 渲染为图片<span class="loading-dots"></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
@@ -874,7 +884,7 @@ async function parseAndSave(file,apiKey){
   let userContent;
   if(isPdf){
     const txt=await extractPdfText(b64);
-    if(txt.length>300){
+    if(txt.length>800){
       userContent=txt+'\n\n'+PARSE_PROMPT;
     } else {
       const img=await pdfToBase64Image(b64);
