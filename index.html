@@ -454,6 +454,24 @@ function localToDb(cd){
 // 数据库行 → 本地对象
 function dbToLocal(row){
   const edu = unpackEdu(row.education);
+  // 旧格式记录（education 不是 "性别:..." 打包格式）的技能/证书/项目并入 workHistory
+  const isLegacy = row.education && !row.education.startsWith('性别:');
+  let wh = row.note || '';
+  if(isLegacy){
+    const parts = [];
+    if(row.note) parts.push(row.note);
+    if(row.education) parts.push('教育：' + row.education);
+    if(Array.isArray(row.skills) && row.skills.length) parts.push('技能：' + row.skills.join('、'));
+    if(Array.isArray(row.projects) && row.projects.length){
+      row.projects.forEach(p=>{
+        const line=[p.name, p.time?'('+p.time+')':'', p.description||''].filter(Boolean).join(' ');
+        parts.push(line);
+      });
+    }
+    if(row.certificates) parts.push('证书：' + row.certificates);
+    wh = parts.filter(Boolean).join('
+');
+  }
   return {
     id: row.id,
     name: row.name,
@@ -464,7 +482,7 @@ function dbToLocal(row){
     eduLevel: edu.eduLevel,
     major: edu.major,
     hometown: edu.hometown,
-    workHistory: row.note,
+    workHistory: wh,
     status: row.status,
     resumeImg: row.resume_img,
     addedAt: row.added_at,
