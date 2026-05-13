@@ -743,24 +743,38 @@ async function extractPdfText(base64Data){
     for(let p=1;p<=Math.min(pdf.numPages,5);p++){
       const page=await pdf.getPage(p);
       const ct=await page.getTextContent();
-      text+=ct.items.map(it=>it.str).join(' ')+'\n';
+      const items=ct.items.filter(it=>it.str.trim());
+      // 按 Y 坐标（四舍五入到 4px 粒度）分组，组内按 X 左→右排序
+      const lineMap={};
+      items.forEach(it=>{
+        const y=Math.round(it.transform[5]/4)*4;
+        if(!lineMap[y]) lineMap[y]=[];
+        lineMap[y].push(it);
+      });
+      Object.values(lineMap).forEach(l=>l.sort((a,b)=>a.transform[4]-b.transform[4]));
+      const sortedY=Object.keys(lineMap).map(Number).sort((a,b)=>b-a);
+      text+=sortedY.map(y=>lineMap[y].map(it=>it.str).join(' ')).join('\n')+'\n';
     }
     return text.trim();
   }catch(e){return '';}
 }
 
-async function pdfToBase64Image(base64Data){
+async function pdfToBase64Images(base64Data){
   const raw=atob(base64Data);
   const bytes=new Uint8Array(raw.length);
   for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
   const pdf=await pdfjsLib.getDocument({data:bytes}).promise;
-  const page=await pdf.getPage(1);
   const scale=2;
-  const vp=page.getViewport({scale});
-  const canvas=document.createElement('canvas');
-  canvas.width=vp.width; canvas.height=vp.height;
-  await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
-  return canvas.toDataURL('image/jpeg',0.9).split(',')[1];
+  const images=[];
+  for(let p=1;p<=Math.min(pdf.numPages,3);p++){
+    const page=await pdf.getPage(p);
+    const vp=page.getViewport({scale});
+    const canvas=document.createElement('canvas');
+    canvas.width=vp.width; canvas.height=vp.height;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    images.push(canvas.toDataURL('image/jpeg',0.9).split(',')[1]);
+  }
+  return images;
 }
 
 const PARSE_PROMPT=`你是一名专业HR，擅长解析51job、智联等平台导出的简历PDF（包括文字乱序的多栏布局）。请从下方内容中提取关键信息，**只返回合法JSON**，不要任何解释或代码块符号。
@@ -829,8 +843,8 @@ async function parseResume(){
         userContent=pdfText+'\n\n'+PARSE_PROMPT;
       } else {
         st.innerHTML=`<div style="padding:10px 0;font-size:13px;color:var(--color-text-secondary)">PDF 渲染为图片<span class="loading-dots"></span></div><div class="progress-bar"><div class="progress-fill" id="prog"></div></div>`;
-        const img=await pdfToBase64Image(currentFileData);
-        userContent=[{type:'image_url',image_url:{url:`data:image/jpeg;base64,${img}`}},{type:'text',text:PARSE_PROMPT}];
+        const imgs=await pdfToBase64Images(currentFileData);
+        userContent=[...imgs.map(img=>({type:'image_url',image_url:{url:`data:image/jpeg;base64,${img}`}})),{type:'text',text:PARSE_PROMPT}];
       }
     } else {
       userContent=[{type:'image_url',image_url:{url:`data:${currentFileType};base64,${currentFileData}`}},{type:'text',text:PARSE_PROMPT}];
@@ -887,8 +901,8 @@ async function parseAndSave(file,apiKey){
     if(txt.length>800){
       userContent=txt+'\n\n'+PARSE_PROMPT;
     } else {
-      const img=await pdfToBase64Image(b64);
-      userContent=[{type:'image_url',image_url:{url:`data:image/jpeg;base64,${img}`}},{type:'text',text:PARSE_PROMPT}];
+      const imgs=await pdfToBase64Images(b64);
+      userContent=[...imgs.map(img=>({type:'image_url',image_url:{url:`data:image/jpeg;base64,${img}`}})),{type:'text',text:PARSE_PROMPT}];
     }
   } else {
     userContent=[{type:'image_url',image_url:{url:`data:${file.type};base64,${b64}`}},{type:'text',text:PARSE_PROMPT}];
