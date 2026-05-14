@@ -1,13 +1,8 @@
 [build]
   publish = "."
-  functions = "netlify/functions"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
   force = false
-
-# 让函数支持二进制（图片上传）
-[functions]
-  node_bundler = "esbuild"

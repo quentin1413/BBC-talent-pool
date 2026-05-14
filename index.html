@@ -1062,21 +1062,11 @@ const PARSE_PROMPT=`你是一名专业HR，擅长解析51job、智联等平台�
 
 async function callAI(userContent,apiKey){
   const messages=[{role:'user',content:userContent}];
-  const isLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:';
-  let resp;
-  if(isLocal){
-    resp=await fetch('https://api.openai.com/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify({model:'gpt-4o',max_tokens:2000,messages})
-    });
-  } else {
-    resp=await fetch('/.netlify/functions/parse',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({apiKey,model:'gpt-4o',max_tokens:2000,messages})
-    });
-  }
+  const resp=await fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body:JSON.stringify({model:'gpt-4o',max_tokens:2000,messages})
+  });
   const data=await resp.json();
   if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
   let raw=data.choices?.[0]?.message?.content||'';
